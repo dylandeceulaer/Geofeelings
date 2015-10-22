@@ -1,3 +1,4 @@
 # Geofeelings
 A Node.js project.
-[Projectdossier](docs/Geofeelings_Dylan_Deceulaer.docx)
+
+[Kijk hier het projectdossier](docs/Geofeelings_Dylan_Deceulaer.docx)
