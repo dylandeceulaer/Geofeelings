@@ -1,0 +1,2 @@
+C:\Users\dylan\Dropbox\3NMCT\Backend webdev\GeoMood\obj\Debug\Exp4-skeleton.njsprojResolveAssemblyReference.cache
+C:\Users\dylan\Dropbox\3NMCT\Backend webdev\GeoMood\bin\Microsoft.NodejsTools.WebRole.dll

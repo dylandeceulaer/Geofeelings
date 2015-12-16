@@ -1,0 +1,25 @@
+body {
+  padding-top: 90px;
+}
+.starter-template {
+  padding: 40px 15px;
+  text-align: center;
+}
+.navbar-inverse{
+    background-color:#313131;
+}
+a.navbar-brand{
+}
+.navbar-inverse .navbar-toggle .icon-bar {
+    background-color: #ccc;
+}
+.navbar-brand{
+    height:90px;
+    padding:25px ;
+}
+.navbar-brand > img{
+    height: 100%;
+}
+.navbar-toggle{
+    padding: 22px 10px;
+}

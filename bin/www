@@ -1,0 +1,30 @@
+﻿#!/usr/bin/env node
+var debug = require('debug')('Parkings');
+var app = require('../app');
+var config = require('../config');
+
+
+//1. sockets activeren 
+var http = require('http');
+var server = http.createServer(app);
+var io = require('socket.io')(server);
+
+//2. initialisaties
+app.set('port', process.env.PORT || 80);
+
+
+//2.1. (self) executing database connectie
+var DBService = require("../data/connectDBService.js");
+var connectDB =  DBService (config.MONGODBURL,require('mongoose') ); //connected mongoose
+
+
+//3. listeners voor server en io
+server.listen(app.get('port'), function () {
+    console.log('Express server listening on port :'+ app.get('port'));
+});
+
+
+
+
+var sockets = io.listen(server);
+require('../sockets.js')(io , connectDB);

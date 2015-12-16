@@ -1,0 +1,43 @@
+﻿<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content='width=device-width, initial-scale=1.0' />
+    <title>Angular en express </title>
+
+    <!-- vendor scripts-->
+    <base href="http://localhost:1337/" target="_blank">
+    <script src="/javascripts/vendor/angular/angular.js"></script>
+    <script src="/javascripts/vendor/angular/angular-route.js"></script>
+
+    <!-- custom scripts-->
+    <script src="/javascripts/app.js"></script>
+
+    <!-- ng-controllers en ng-services voor "user" -->
+    <script src='/javascripts/services/userService.js'></script>
+    <script src='/javascripts/controllers/userController.js'></script>
+
+    <!-- stylesheets -->
+    <link href="stylesheets/normalize.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+    <!--<link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon" />-->
+
+</head>
+<body>
+    <section>
+        Welkom bij Angular views.     
+    </section>
+
+    <section ng-app="myApp" ng-controller="userController as userCtrl">
+        {{userCtrl.msg}}
+        <!-- dynamische ng views -->
+        <div ng-view></div>
+    </section>
+
+    <footer>
+        <hr /> <a href="/" target="_self">Terug naar index</a>
+    </footer>
+
+</body>
+</html>

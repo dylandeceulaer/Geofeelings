@@ -1,0 +1,37 @@
+﻿extends ../layout
+block content
+
+	- if (user && user.username) {
+	h1 Nieuwe gebruiker
+		span= " "+user.username
+	-}else{
+	h1 Nieuwe gebruiker    
+	-}
+
+	div#errValidation(class="error",style="color:red ;  padding-left: 5px")
+		!= errString
+
+	form(method="POST", action="/users")
+		input#creationDate(name="creationDate", value=creationDate , readonly ,  hidden="hidden")
+
+		p
+			label(for="username") Gebruikersnaam<br />
+			input#username(name="username", value= user?user.username:"")
+			span#username(class="error", style="color:red ;  padding-left: 5px")
+		p
+			label(for="name") Naam<br />
+			input#name(name="name", value= user?user.name:"")
+			span#name(class="error", style="color:red ;  padding-left: 5px")
+		p
+			label(for="email") Email<br />
+			input#email(name="email", value= user?user.email:"")
+		p
+			label(for="gender") Gender<br />
+			//input#gender(name="gender")
+			select(name="gender")
+						option(value="none") --- Kies ---
+						option(value="M") Man
+						option(value="F") Vrouw
+
+		p
+			input(type="submit", value="Maak een user aan")       

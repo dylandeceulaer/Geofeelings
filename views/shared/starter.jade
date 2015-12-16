@@ -1,0 +1,47 @@
+extends ../../node_modules/jade-bootstrap/layouts/starter
+append styles
+    // Custom styles for this template
+    link(href='stylesheets/sticky-footer.css', rel='stylesheet')
+    link(href='stylesheets/starter-template.css', rel='stylesheet')
+    
+html(lang="en")
+    head
+        block styles
+            link(rel="stylesheet",href="stylesheets/bootstrap.css")
+    block body
+        <a class="anchor" id="home"></a>
+
+        nav.navbar.navbar-fixed-top.navbar-inverse(role="navigation")
+            .container
+                .navbar-header
+                    button(type="button" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar" class="navbar-toggle collapsed")
+                        span.sr-only="Toggle navigation"
+                        span.icon-bar
+                        span.icon-bar
+                        span.icon-bar
+                    a#logoLink.navbar-brand.page-scroll(href= "#home")
+                        img(src="/images/LogoTextOnly.png")
+
+
+                #navbar.collapse.navbar-collapse
+                    ul.nav.navbar-nav
+                        li.active.page-scroll.homeLi
+                            a(href="#home") Home
+                        if(!user)
+                            li.page-scroll
+                                a(href="#next") Log in
+                            li.page-scroll
+                                a(href="#next2") Sign up
+                        if(user)
+                           li.page-scroll
+                                a(href="/logout") Logout
+                            li #{ !user ? "" : "Hello " + user.username + "!"}
+        
+
+        block content
+    
+        footer.footer
+            .container
+                block footer
+                    include footer
+    

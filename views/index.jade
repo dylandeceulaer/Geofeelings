@@ -1,0 +1,125 @@
+extends shared/starter
+
+append styles
+    link(href='stylesheets/index.css', rel='stylesheet')
+    link(href='stylesheets/css/font-awesome.css', rel='stylesheet')
+    
+append scripts
+    script(src='http://code.jquery.com/ui/1.10.3/jquery-ui.js')
+    script(src='/javascripts/effects.js')
+    script(src='/javascripts/Form.js')
+
+
+block content
+    
+    /////////////////UNAUTHORIZED/////////////
+    if(!user)
+        .PageFiller.map
+            .col-centered
+                <img class="Map" src="/images/LogoMed.png"/>
+                h1 How do you feel today?
+                <a href="#next" class="btn btn-circle page-scroll"><i class="fa fa-angle-double-down animated"></i></a>
+        .PageFiller
+            <a class="anchor" id="next"></a>
+            <a class="anchor" id="next2"></a>
+            .container.signup
+                h2.form-h2 Join GeoMood today!
+                form.well.form-horizontal.formHighlight#login(action="/login", method="post")
+                    fieldset
+                        legend="Already a member?"
+                        .form-group
+                            label.control-label.col-lg-4(for="username") Username
+                            .col-lg-8    
+                                input.form-control(type="text", id="username", name="username",placeholder="Username")
+                                p(class="help-block") 
+
+                        .form-group
+                            label.control-label.col-lg-4(for="password") Password
+                            .col-lg-8
+                                input.form-control(type="password", id="password", name="password",placeholder="Password")
+                                p(class="help-block")
+                        .form-group
+                            .col-lg-8.col-lg-offset-4
+                                button.btn.btn-primary.col-lg-12.has-spinner#LoginBtn(type="submit")
+                                    span.spinner
+                                        i.fa.fa-refresh.fa-spin
+                                    ="Log in"
+                                
+                            br
+                            .col-lg-12
+                                .alert.alert-dismissible.alert-danger#errorLogin(hidden)
+                                    button(type="button" class="close" data-dismiss="alert")="x"
+                                
+                form.well.form-horizontal.formHighlight#register(action="/signup", method="post")
+                    fieldset
+                        legend="Are you new here?"
+                        
+                        .form-group
+                            label.control-label.col-lg-4(for="usernamereg") Username
+                            .col-lg-8    
+                                input.form-control(type="text", id="usernamereg", name="username",placeholder="Username")
+                                p(class="help-block") 
+                        .form-group
+                            label.control-label.col-lg-4(for="name")="Full name"
+                            .col-lg-8
+                                input.form-control(type="text", id="name", name="name",placeholder="Full name")
+                                p(class="help-block")
+                        .form-group
+                            label.control-label.col-lg-4(for="name")="Email address"
+                            .col-lg-8
+                                input.form-control(type="text", id="email", name="email",placeholder="Email address")
+                                p(class="help-block")
+                        .form-group
+                            label.control-label.col-lg-4(for="passwordreg") Password
+                            .col-lg-8
+                                input.form-control(type="password", id="passwordreg", name="password",placeholder="Password")
+                                p(class="help-block")
+
+
+                        .form-group
+                            .col-lg-8.col-lg-offset-4
+                                button.btn.btn-primary.col-lg-12(type="submit")="Sign up"
+
+
+    /////////////////AUTHORIZED/////////////
+
+    if(user)
+       .PageFiller
+           p Well hello there #{user.username}          
+            
+                
+    .container
+        p(id="about") Welcome to #{title}
+        +alert-info("This is a sample info alert.")
+
+
+
+
+
+
+
+
+
+
+        //
+            +alert-info("This is a sample info alert.")
+            +alert-info("This is a sample info alert.")
+            +navbar("Project name","dropdown_menu")
+            +navbar("Project name","dropdown_menu","inverse")
+            +navbar("Project name","dropdown_menu")
+                +nav_item("index.html","active") Home
+                +nav_item("about.html") About
+                +nav_item("contact.html") Contact
+            +navbar("Project name","dropdown_menu")
+                +nav_item("index.html","active") Home
+                +nav_item("about.html") About
+                +nav_item("contact.html") Contact
+                +nav_item_dropdown("#")(label="Dropdown")
+                    +nav_item("#") Action
+                    +nav_item("#") Another Action
+                    +nav_item("#") Something else here
+                    +nav_divider
+                    +nav_header Nav header
+                    +nav_item("#") Separated link
+                    +nav_item("#") One more separated link
+        //

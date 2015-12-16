@@ -1,0 +1,19 @@
+﻿//apiCall.jade voor users
+extends ../layout
+
+block head 
+    script(src="/javascripts/XHR.js")
+    script(src="/javascripts/index.js")
+
+block content
+    h1= title
+    
+    h2 Gebruikers overzicht
+    #usersList
+
+    script.
+        var xhr = new XHR("/api/users/", function(result) {
+            xhr.showDataInTable(result, ["username", "name", "id" , "gender" , "creationDate" ] , function (table) {
+                document.getElementById("usersList").appendChild(table);
+            });
+        });

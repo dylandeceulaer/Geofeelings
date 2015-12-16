@@ -1,0 +1,64 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        //socket initialisatie:
+        var hostname = window.location.protocol + "//" + window.location.host;
+        var socket = io.connect(hostname);
+    </script>
+
+    <script>
+        //socket handlers:
+        socket.on('message', function (message) {
+            client.api.showMessage(message, "showSocketID");
+        });
+
+        socket.on('creation_success', function (message) {
+            //redirect
+            location.href = "/users";
+        });
+    </script>
+    <title>indexSockets vervangen XMLHTTP</title>
+</head>
+<body>
+    <section>
+        <h3>Socket communicatie</h3>
+    </section>
+
+    <section>
+        <div id="showSocketID"></div>
+
+        <form name="frmCreateSocket" method="post" action="users/create">
+            <p>
+                <label for="username">Gebruikersnaam:</label>
+                <input id="username" name="username" />
+            </p>
+            <p>
+                <label for="name">Naam:</label>
+                <input id="name" name="userId" />
+            </p>
+            <p>
+                <label for="email">Email:</label>
+                <input id="email" name="email" />
+            </p>
+            <p>
+                <select name="gender">
+                    <option value="none">--- Maak je keuze ---</option>
+                    <option value="M">Mannelijk</option>
+                    <option value="F">Vrouwelijk</option>
+                </select>
+            </p>
+            <p>
+                <input type="button" id="btnCreate" name="btnCreate" value="Maak de gebruiker aan." />
+            </p>
+        </form>
+    </section>
+    <footer>
+        <hr />
+        <a href="/">Terug naar index </a>
+    </footer>
+    <script src="javascripts/index.js"></script>
+</body>
+</html>

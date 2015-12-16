@@ -1,0 +1,15 @@
+﻿extends ../layout
+
+block head
+
+block content
+    h1= title
+        h2 met paginas rendered via de jade HTML preprocessor
+    
+    p
+        a(href="/users/new") Maak een nieuwe gebruiker 
+    ul
+        - for(var user in userslist) {
+        li
+            span= userslist[user].username
+        - };

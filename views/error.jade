@@ -1,0 +1,7 @@
+extends shared/starter
+append styles
+	link(href="stylesheets/style.css", rel="stylesheet")
+block body
+	h1= message
+	h2= error.status
+	pre #{error.stack}
