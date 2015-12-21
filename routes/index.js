@@ -6,8 +6,18 @@ var User = require("../data/models/user");
 
 /* GET home page. */
 router.get('/', function (req, res) {
-   res.render('index', { title: 'GeoMood - How do you feel today?', user : req.user });
+    if(req.user)
+        res.render('indexAuthorized', { title: 'GeoMood - How do you feel today?', user : req.user });
+    else
+        res.render('indexUnauthorized', { title: 'GeoMood - How do you feel today?'});
    // res.redirect('/users');
+});
+
+router.get('/Profile', function (req, res) {
+    if (req.user)
+        res.render('Profile', { title: 'GeoMood - Profile', user : req.user });
+    else
+        res.redirect('/');
 });
 
 
@@ -16,8 +26,9 @@ router.post('/login', passport.authenticate('local'), function (req, res) {
 });
 
 router.post('/signup', function (req, res) {
-    User.register(new User({ username : req.body.usernamereg, name : req.body.name, email : req.body.email }), req.body.passwordreg, function (err, account) {
+    User.register(new User({ username : req.body.username, name : req.body.name, email : req.body.email }), req.body.password, function (err, account) {
         if (err) {
+            console.log(err);
             return res.render('register', { account : account });
         }
         

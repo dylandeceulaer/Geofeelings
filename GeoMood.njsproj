@@ -42,6 +42,8 @@
     <Compile Include="public\javascripts\effects.js" />
     <Compile Include="public\javascripts\Form.js" />
     <Compile Include="public\javascripts\index.js" />
+    <Compile Include="public\javascripts\map.js" />
+    <Compile Include="public\javascripts\profile.js" />
     <Compile Include="public\javascripts\services\userService.js" />
     <Compile Include="public\javascripts\vendor\angular\angular-route.js" />
     <Compile Include="public\javascripts\vendor\angular\angular-sanitize.js" />
@@ -76,6 +78,7 @@
     <Content Include="public\stylesheets\non-responsive.css" />
     <Content Include="public\stylesheets\normalize.css" />
     <Content Include="public\stylesheets\offcanvas.css" />
+    <Content Include="public\stylesheets\profile.css" />
     <Content Include="public\stylesheets\signin.css" />
     <Content Include="public\stylesheets\starter-template.css" />
     <Content Include="public\stylesheets\sticky-footer-navbar.css" />
@@ -86,7 +89,9 @@
     <Content Include="public\views\users\home.html" />
     <Content Include="README.md" />
     <Content Include="views\error.jade" />
-    <Content Include="views\index.jade" />
+    <Content Include="views\indexAuthorized.jade" />
+    <Content Include="views\indexUnauthorized.jade" />
+    <Content Include="views\Profile.jade" />
     <Content Include="views\shared\footer.jade" />
     <Content Include="views\shared\starter.jade" />
     <Content Include="views\users\apiCall.jade" />
@@ -103,6 +108,7 @@
     <Folder Include="public\javascripts\vendor\jquery\" />
     <Folder Include="public\javascripts\vendor\angular\" />
     <Folder Include="public\fonts\" />
+    <Folder Include="public\userimages\" />
     <Folder Include="public\views\" />
     <Folder Include="public\views\users\" />
     <Folder Include="routes\api\" />

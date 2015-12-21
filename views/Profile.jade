@@ -1,0 +1,28 @@
+﻿extends shared/starter
+
+append styles
+    link(href='stylesheets/index.css', rel='stylesheet')
+    link(href='stylesheets/profile.css', rel='stylesheet')
+    link(href='stylesheets/css/font-awesome.css', rel='stylesheet')
+    
+append scripts
+    script(src='http://code.jquery.com/ui/1.10.3/jquery-ui.js')
+    script(src='/javascripts/effects.js')
+    script(src='/javascripts/profile.js')
+
+
+block content
+    .inputHidden
+        input#ProfileImage(type="file")
+
+    .PageFiller
+        .profile-header
+            
+            
+            .img-circle(style='background-image: url(/userimages/#{user.image})')
+                
+        .profile-content.container
+            h2 #{user.username}
+            h3 #{user.name}
+            
+            

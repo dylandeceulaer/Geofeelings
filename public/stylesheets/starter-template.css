@@ -1,6 +1,10 @@
 body {
   padding-top: 90px;
 }
+.nav-right{
+    float:right;
+    margin-right:100px;
+}
 .starter-template {
   padding: 40px 15px;
   text-align: center;

@@ -16,7 +16,8 @@ client.api = (function () {
     };
     
     var getUsersbyAPI = function (url) {
-        var xhr = new XHR();        return (xhr.responsData);
+        var xhr = new XHR();
+        return (xhr.responsData);
     };
     
     var addHandlers = function () {

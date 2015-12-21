@@ -22,10 +22,15 @@ h1{
     height: 100%;
     
 }
+
 .anchor{
     position: relative;
     top: -90px;
     visibility: hidden;
+}
+#next2{
+    top: -100px;
+
 }
 .map{
     background: url(/images/Map.jpg) no-repeat center center scroll;
@@ -37,6 +42,35 @@ h1{
 .Map{
     margin:15px 0 0;
 }
+
+.form-group{
+    margin-bottom:0;
+}
+
+.help-block{
+    height:15px;
+    font-size:12px;
+    margin-bottom:4px;
+}
+
+.has-error:before {
+    content: "\f06a";
+    font-family: FontAwesome;
+    color:red;
+    left:90%;
+    position:absolute;
+    top: 8px;
+ }
+
+.has-success:before {
+    content: "\f058";
+    font-family: FontAwesome;
+    color:green;
+    left:90%;
+    position:absolute;
+    top: 8px;
+ }
+
 
 .col-centered{
     display:table-cell;
@@ -82,7 +116,6 @@ h1{
   transition: opacity 0.25s, width 0.25s;
 }
 
-
 /* ... */
 
 .has-spinner.spinner-active .spinner {
@@ -113,10 +146,14 @@ h1{
 }
 
 @media (min-width: 1200px) {
-    #errorLogin{
+    #errorLogin, #errorRegister{
         margin-top: 20px;
     }
     
+}
+
+.RegisterBtn{
+    margin-top:5px;
 }
 
 

@@ -29,15 +29,17 @@ html(lang="en")
                             a(href="#home") Home
                         if(!user)
                             li.page-scroll
-                                a(href="#next") Log in
+                                a#Login(href="#next") Log in
                             li.page-scroll
                                 a(href="#next2") Sign up
-                        if(user)
-                           li.page-scroll
-                                a(href="/logout") Logout
-                            li #{ !user ? "" : "Hello " + user.username + "!"}
-        
-
+                            li.page-scroll
+                                a(href="#info") Info
+                    if(user)
+                        ul.nav.navbar-nav.nav-right
+                            +nav_item_dropdown("#")(label="#{user.username}")
+                                +nav_item("/profile") Profile
+                                +nav_item("/logout") Logout
+                          
         block content
     
         footer.footer

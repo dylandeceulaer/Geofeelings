@@ -7,44 +7,82 @@ var express = require('express');
 var router = express.Router();
 var UsersRepo = require("../../data/models/usersRepo");
 var passport = require('passport');
+var User = require("../../data/models/user");
+var multer = require('multer');
+var crypto = require('crypto');
+var path = require('path');
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'public/userimages/')
+    },
+    filename: function (req, file, cb) {
+        crypto.pseudoRandomBytes(16, function (err, raw) {
+            if (err) return cb(err)
+            
+            cb(null, raw.toString('hex') + path.extname(file.originalname))
+        })
+    }
 
-
-/*
-var loadUser = require('../middleware/load_user.js')
-
-
-
-//--- pagina oproepen met een XMLHTTP call
-router.get('/apiCall', function (req, res) {
-    res.render('users/apiCall', {
-        title: 'Ophalen van users met XMLHTTP'
-    })
 });
 
-//---- API controller
-router.get('/', function (req, res) {
-    UsersRepo.getAllUsers(function (err , users) {
-        if (err) {
-            res.json(err);
-        }
-        res.json(users);
-        //res.end(JSON.stringify(users)); //alternatief
-    }); 
+
+function fileFilter(req, file, cb) {
+    var AcceptedFileTypes = ["image/jpeg", "image/gif", "image/png","image/bmp"]
+    console.log(req.user);
+    if (req.user && AcceptedFileTypes.indexOf(file.mimetype) > -1) {
+        cb(null, true);
+    }
+    else if (AcceptedFileTypes.indexOf(file.mimetype) == -1 || !req.user) {
+        cb(null, false);
+    }
+    else {
+        cb(new Error('Something happened.'));
+    }
+
+}
+
+var upload = multer({
+    storage: storage,
+    fileFilter: fileFilter,
+    limits: {
+        fileSize: 5 * 1024 * 1024,
+        files:1
+    }
 });
- * 
- * */
 
 
 router.get('/:username?', function (req, res) {
-    UsersRepo.findUser(req.params.username,function (err , result) {
+    UsersRepo.findUser(req.params.username, function (err , result) {
         if (err) {
-                    res.send('nok');
+            res.status(500);
+            res.send('Internal server Error');
         }
         if (result.length > 0) {
-               res.send('ok');
+            res.status(200);
+            res.send('Found');
         }
         else {
-               res.send('nok');
+            res.status(204);
+            res.send('Nothing Found');
+                
+        }
+    });
+});
+
+
+router.get('/byemail/:email?', function (req, res) {
+    UsersRepo.findUserByEmail(req.params.email, function (err , result) {
+        if (err) {
+            res.status(500);
+            res.send('Internal server Error');
+        }
+        if (result.length > 0) {
+            res.status(200);
+            res.send('Found');
+        }
+        else {
+            res.status(204);
+            res.send('Nothing Found');
                 
         }
     });
@@ -53,12 +91,50 @@ router.get('/:username?', function (req, res) {
 router.post('/login', passport.authenticate('local'), function (req, res) {
     
         if (req.user) {
-            res.send('ok');
+            res.status(200);
+            res.send('Success');
         }
         else {
-            res.send('nok');
+            res.status(401);
+            res.send('Unsuccessful');
                 
         }
+});
+
+router.post('/uploadImage', upload.single('image'), function (req, res) {
+    console.log(req.file);
+    if (req.file) {
+        UsersRepo.updateUser(req.user.username, { image: req.file.filename }, function (err,result){
+            if (result) {
+                res.status(200);
+                res.send(req.file.filename);
+            } else {
+                res.status(204);
+                res.send('Unsuccessful');
+            }
+        })
+    }
+    else {
+        res.status(204);
+        res.send('Unsuccessful');
+    }
+});
+
+
+
+router.post('/signup', function (req, res) {
+    User.register(new User({ username : req.body.username, name : req.body.name, email : req.body.email }), req.body.password, function (err, account) {
+        if (err) {
+            res.status(204);
+            res.json({ error : err, account : account });
+        } else {
+            
+            passport.authenticate('local')(req, res, function () {
+                res.status(200);
+                res.send("Success");
+            });
+        }
+    });
 });
 
 

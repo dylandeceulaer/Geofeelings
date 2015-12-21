@@ -1,0 +1,45 @@
+extends shared/starter
+
+append styles
+    link(href='stylesheets/index.css', rel='stylesheet')
+    link(href='stylesheets/css/font-awesome.css', rel='stylesheet')
+    
+append scripts
+    script(src='http://code.jquery.com/ui/1.10.3/jquery-ui.js')
+    script(src='/javascripts/effects.js')
+    script(src='/javascripts/map.js')
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCs_9qVC8-LjAinVOR0zY64frEZTCxqoeU&callback=initMap">
+    </script>
+
+block content
+
+    .PageFiller#googlemap
+        Google maps don't seem to be able to run.           
+            
+                
+    .container
+        p(id="about") Welcome to #{title}
+        +alert-info("This is a sample info alert.")
+
+        //
+            +alert-info("This is a sample info alert.")
+            +alert-info("This is a sample info alert.")
+            +navbar("Project name","dropdown_menu")
+            +navbar("Project name","dropdown_menu","inverse")
+            +navbar("Project name","dropdown_menu")
+                +nav_item("index.html","active") Home
+                +nav_item("about.html") About
+                +nav_item("contact.html") Contact
+            +navbar("Project name","dropdown_menu")
+                +nav_item("index.html","active") Home
+                +nav_item("about.html") About
+                +nav_item("contact.html") Contact
+                +nav_item_dropdown("#")(label="Dropdown")
+                    +nav_item("#") Action
+                    +nav_item("#") Another Action
+                    +nav_item("#") Something else here
+                    +nav_divider
+                    +nav_header Nav header
+                    +nav_item("#") Separated link
+                    +nav_item("#") One more separated link
+        //

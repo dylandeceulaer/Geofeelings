@@ -22,7 +22,9 @@ var UserSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        //required: true
+    },
+    image: {
+        type: String,
     },
     createdOn: { type: Date, 'default': Date.now },
     lastLogin: Date
@@ -31,14 +33,14 @@ UserSchema.path("username").validate(function (v) {
     return v.length <= 25;
 }, 'Your username can only contain up to 25 characters.');
 UserSchema.path("username").validate(function (v) {
-    return v.length >= 5;
-}, 'Your username must contain 5 or more characters.');
+    return v.length >= 4;
+}, 'Your username must contain 4 or more characters.');
 
 UserSchema.path("password").validate(function (v) {
     return v.length <= 100;
 }, 'Your username can only contain up to 100 characters.');
 UserSchema.path("password").validate(function (v) {
-    return v.length >= 6;
+    return v.length >= 5;
 }, 'Your username must contain 6 or more characters.');
 
 UserSchema.plugin(passportLocalMongoose);
