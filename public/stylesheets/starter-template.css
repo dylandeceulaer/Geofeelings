@@ -1,9 +1,11 @@
 body {
   padding-top: 90px;
 }
-.nav-right{
-    float:right;
-    margin-right:100px;
+@media (min-width: 768px) {
+    .nav-right {
+        float: right;
+        margin-right: 100px;
+    }
 }
 .starter-template {
   padding: 40px 15px;

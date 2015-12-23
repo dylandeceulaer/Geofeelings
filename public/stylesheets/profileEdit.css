@@ -1,0 +1,122 @@
+﻿body {
+}
+.PageFiller{
+    min-height:100%;
+    background-color:#efefef;
+}
+.profile-heading{
+    margin-bottom:30px;
+    font-size: 45px;
+    text-align:center;
+}
+.profile-item p, .profile-item i{
+    display:inline;
+
+}
+
+.profile-item-editable p:hover:after{
+    content:"\f040";
+    font-family:FontAwesome;
+    margin-left:10px;
+    cursor:pointer;
+}
+.profile-item{
+}
+.profile-item i {
+    float:right;
+    margin-right:15px;
+    cursor: pointer;
+}
+.profile-heading a{
+    margin-left:15px;
+    font-size: 35px;
+}
+.panel{
+    text-align:left;
+}
+.profile-header{
+    width:100%;
+    height:250px;
+    background: linear-gradient(
+      rgba(0, 0, 0, 0.45), 
+      rgba(0, 0, 0, 0.45)
+    ),url(https://unsplash.it/2000/250/?random) center no-repeat;
+    background-size: cover;
+}
+
+table{
+    width:100%;
+}
+.happy{
+    color:greenyellow;
+}
+.unhappy{
+    color:blue;
+}
+.profile-pic{
+    position:relative;  
+    height: 250px;
+    width: 250px;
+    margin:0 auto;
+    top:75px;
+}
+.img-circle {
+    
+    background: url(/images/NoPic.jpg) center;
+    background-size: cover;
+}
+.friend-item{
+    width:100px;
+    height:120px;
+    margin-bottom:15px;
+    text-align:center;
+    display:inline-block;
+    margin-right:5%;
+    margin-left: 4%;
+}
+.friend-item-image{
+    height:100px;
+    width:100px;
+}
+.comment-item-image{
+    height:60px;
+    width:60px;
+}
+.profile-action-item:hover:before{
+     content:"\f00d";
+     font-family:FontAwesome;
+     cursor:pointer;
+     position:absolute;
+     left:90%;
+ }
+.alert{
+    position:absolute;
+    top: 10px;
+    left: 30%;
+    right: 30%;
+    text-align:center;
+    
+}
+.profile-pic:hover:before {
+    content: url(/images/upload.png);
+    height:250px;
+    width:250px;
+}
+.img-circle:hover {
+
+    cursor:pointer;
+}
+.profile-content{
+    margin-top:75px;
+}
+.img-circle input{
+    top:-250px;
+    visibility:hidden;
+    height:250px;
+    width:250px;
+}
+.inputHidden {
+ width: 0px;
+ height: 0px;
+ overflow: hidden;
+}

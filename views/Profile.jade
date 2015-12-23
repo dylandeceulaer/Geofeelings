@@ -17,12 +17,21 @@ block content
 
     .PageFiller
         .profile-header
-            
-            
-            .img-circle(style='background-image: url(/userimages/#{user.image})')
+            .img-circle(style=typeof user.image === "undefined" ? "" : 'background-image: url(/userimages/#{user.image})' )
                 
         .profile-content.container
-            h2 #{user.username}
-            h3 #{user.name}
-            
+            .col-lg-6.col-lg-offset-3
+                h2 #{user.username}
+            .col-lg-6
+                .panel.panel-default
+                    .panel-heading
+                        ='Profile Info'
+                    .panel-body
+                        p Name: #{user.name}
+            .col-lg-6
+                .panel.panel-default
+                    .panel-heading
+                        ='Friends'
+                    .panel-body
+                        p Name: #{user.name}
             

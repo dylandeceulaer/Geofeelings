@@ -13,12 +13,7 @@ router.get('/', function (req, res) {
    // res.redirect('/users');
 });
 
-router.get('/Profile', function (req, res) {
-    if (req.user)
-        res.render('Profile', { title: 'GeoMood - Profile', user : req.user });
-    else
-        res.redirect('/');
-});
+
 
 
 router.post('/login', passport.authenticate('local'), function (req, res) {
