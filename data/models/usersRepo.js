@@ -30,7 +30,7 @@ UsersRepo = (function () {
         },
 
         findUser = function (username, next) {
-            User.find({ username: username }, function (err, res) {
+            User.find({ username: username }).populate('friends').exec(function (err, res) {
                 next(err, res);
             });
         },
@@ -65,15 +65,29 @@ UsersRepo = (function () {
             User.find({ email: email }, function (err, res) {
                 next(err, res);
             });
+},
+        addFriend = function (User1Id, User2Id,next){
+            User.findOne({ _id: User1Id }, function (err, res) {
+                if (!err) {
+                    res.friends.push(User2Id);
+                    res.save(function (err,result) {
+                        if (!err) {
+                            return next(null,result);
+                        }
+                    });
+                }
+                return next("something went wrong");
+            });
         };
     
     return {
-        model :User ,
+        model : User ,
         getAllUsers: getAllUsers,
         findUser: findUser,
         findUserByEmail: findUserByEmail,
         updateUser: updateUser,
-        createUser: createUser
+        createUser: createUser,
+        addFriend: addFriend
     };
 })();
 

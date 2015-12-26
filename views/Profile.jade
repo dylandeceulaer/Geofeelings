@@ -9,6 +9,8 @@ append scripts
     
     script(type='text/javascript').
         var qryUser =!{JSON.stringify(qryUser)}
+    script(type='text/javascript').
+        var user =!{JSON.stringify(user)}
     script(src='http://code.jquery.com/ui/1.10.3/jquery-ui.js')
     script(src='/javascripts/effects.js')
     script(src='/javascripts/profileEdit.js')
@@ -21,7 +23,7 @@ block content
         .profile-content.container
             .profile-heading
                 =qryUser.username
-                <a href="#"><i class="fa fa-user-plus"></i></a>
+                <a href="/api/users/addFriend/#{qryUser._id}"><i class="fa fa-user-plus"></i></a>
             .col-lg-5
                 .panel.panel-default
                     .panel-heading
@@ -79,19 +81,20 @@ block content
                 .panel.panel-default
                     .panel-heading
                         h3.panel-title Comments
-                    .panel-body
+                    .panel-body.comment-body
                         if(qryUser.comments)
                             each val in qryUser.comments
-                                .col-xs-2
-                                    .img-circle.comment-item-image(style= 'background-image: url(/userimages/#{val.author.image})' )
-                                .col-xs-10
-                                    .panel
-                                        .panel-body #{val.comment}     
+                                .comment-item    
+                                    .col-xs-2
+                                        .img-circle.comment-item-image(style= 'background-image: url(/userimages/#{val.author.image})' )
+                                    .col-xs-10
+                                        .panel
+                                            .panel-body #{val.comment}     
                                 
                                 
                          .col-xs-12
                              .input-group
                                  input.form-control#replyInput(type="text" placeholder="Post a comment")
                                  span.input-group-btn
-                                     button.btn.btn-default(type="button" )#reply Reply 
+                                     input.btn.btn-default#reply(type="submit" value="Reply")  
                          

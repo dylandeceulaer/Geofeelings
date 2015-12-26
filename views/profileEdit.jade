@@ -86,14 +86,17 @@ block content
                     .panel-heading
                         h3.panel-title Comments
                     .panel-body
-                        .col-xs-2
-                            .img-circle.comment-item-image(style= 'background-image: url(/userimages/8cbcb325a24560d2dccbac1a85511351.jpg)' )
-                        .col-xs-10
-                            .panel
-                                .panel-body.profile-action-item Nice profile dude!     
-                        .col-xs-2
-                            .img-circle.comment-item-image(style= 'background-image: url(/userimages/2f145616049bbdfe80077b778cc6f6be.png)' )
-                        .col-xs-10
-                            .panel
-                                .panel-body.profile-action-item Hey, good to see you on here. You comming tomorrow?? 
+                        if(user.comments)
+                            each val in user.comments
+                                -console.log(val.author)
+                                .comment-item    
+                                    .col-xs-2
+                                        .img-circle.comment-item-image(style= 'background-image: url(/userimages/#{val.author.image})' )
+                                    .panel.col-xs-10
+                                        .panel-body
+                                            .col-xs-11
+                                                = val.comment
+                                            .col-xs-1
+                                                a(href="##{val._id}") 
+                                                    i.fa.fa-remove
                        

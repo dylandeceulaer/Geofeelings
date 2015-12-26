@@ -8,7 +8,21 @@ var CommentRepo = require("../data/models/commentRepo");
 
 router.get('/', function (req, res) {
     if (req.user)
-        res.render('profileEdit', { title: 'GeoMood - Profile', user : req.user });
+        CommentRepo.getComments(req.user._id, function (err, arrComments) {
+            if (err && err == "No records found") {
+                res.render('profileEdit', { title: 'GeoMood - Edit Profile', user : req.user });
+            }
+            else if (err) {
+                console.log(err);
+                res.status(500);
+                res.send("something went wrong.");
+                    
+            } else {
+                req.user.comments = arrComments;
+                res.render('profileEdit', { title: 'GeoMood - Edit Profile', user : req.user });
+                console.log(arrComments);
+            }
+        });
     else
         res.redirect('/');
 });
@@ -21,9 +35,10 @@ router.get('/:User', function (req, res) {
         }
         UsersRepo.findUser(user, function (err,result) {
             if (result) {
-                CommentRepo.getComments(result[0]._id, function (err, arrComments){
-                    if (err && err == "no records found") {
-                        res.render('profile', { title: 'GeoMood - Profile: ' + user, qryUser : result[0], user : req.user});
+                console.log(result);
+                CommentRepo.getComments(result[0]._id, function (err, arrComments) {
+                    if (err && err == "No records found") {
+                        res.render('profile', { title: 'GeoMood - Profile: ' + user, qryUser : result[0], user : req.user });
                     }
                     else if (err) {
                         res.status(500);
@@ -34,7 +49,7 @@ router.get('/:User', function (req, res) {
                         res.render('profile', { title: 'GeoMood - Profile: ' + user, qryUser : result[0], user : req.user });
                         console.log(arrComments);
                     }
-                })
+                });
             }
             else {
                 res.redirect('/');

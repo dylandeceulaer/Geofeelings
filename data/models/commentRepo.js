@@ -6,7 +6,7 @@ CommentRepo = (function () {
    
 
     var getComments = function (user, next) {
-        Comment.find({ owner: user }).populate('author').sort('createdOn').exec(function (err, res) {
+        Comment.find({ owner: user }).populate('author').sort({createdOn: -1}).exec(function (err, res) {
             if (err) {
                 console.log(err);
                 next(err, null);
@@ -24,6 +24,11 @@ CommentRepo = (function () {
             });
         },
 
+        getById = function (id, next) {
+            Comment.find({ _id: id }).populate('owner').exec(function (err, res) {
+                next(err, res);
+            });
+        },
         deleteComment = function (commentId, next) {
             Comment.remove({ _id: commentId }, function (err) {
                 if (err) {
@@ -37,7 +42,8 @@ CommentRepo = (function () {
     return {
         getComments : getComments ,
         putComment: putComment,
-        deleteComment: deleteComment
+        deleteComment: deleteComment,
+        getById: getById
     };
 })();
 

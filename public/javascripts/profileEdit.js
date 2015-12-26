@@ -7,12 +7,25 @@
         oReq.addEventListener('load', cb);
         oReq.send(param);
     }
+    
+    $(".comment-item a").click(function (e) {
+        e.preventDefault();
+        console.log($(e.target).parent().attr('href').replace("#", ""));
+        XHRPost("/api/profile/deleteComment", "id=" + $(e.target).parent().attr('href').replace("#",""), function () {
+            if (this.status == 200) {
+                $(e.target).parent().parent().parent().parent().parent().remove();
+            }
+        });
+    });
 
     $("#reply").click(function(){
         var comment = $("#replyInput").val();
         if (comment != "") {
             XHRPost("/api/profile/putComment", "owner=" + qryUser._id + "&comment=" + comment, function () {
-                console.log(qryUser);
+                if (this.status == 200) {
+                    $('<div class="comment-item"><div class="col-xs-2"><div style="background-image: url(/userimages/' + user.image + ')" class="img-circle comment-item-image"></div></div><div class="col-xs-10"><div class="panel"><div class="panel-body">' + comment + '</div></div></div></div>').insertBefore($(".comment-body").children().first());
+                    $("#replyInput").val("");
+                }
             });
         }
     });

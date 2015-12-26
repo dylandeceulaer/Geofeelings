@@ -61,6 +61,18 @@ router.get('/byemail/:email?', function (req, res) {
     });
 });
 
+router.get('/addFriend/:id', function (req, res) {
+    if (!req.user) {
+        res.status(401);
+        res.send("you need to be logged in to post a comment.");
+    } else {
+        var id = req.params.id;
+        UsersRepo.addFriend(req.user._id, id, function (err , result) {
+            console.log(err);
+            console.log(result);
+        });
+    }
+});
 router.post('/login', passport.authenticate('local'), function (req, res) {
     
         if (req.user) {
