@@ -26,6 +26,7 @@ var UserSchema = new mongoose.Schema({
     image: {
         type: String,
     },
+    
     createdOn: { type: Date, 'default': Date.now },
     lastLogin: Date
 });

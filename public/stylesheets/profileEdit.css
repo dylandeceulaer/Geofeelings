@@ -13,13 +13,19 @@
     display:inline;
 
 }
-
-.profile-item-editable p:hover:after{
+.col-xs-2 i{
+    margin-right:5px;
+   cursor:pointer;
+}
+.profile-item-title{
+    font-weight:bold;
+}
+/*.profile-item-editable:hover:after{
     content:"\f040";
     font-family:FontAwesome;
     margin-left:10px;
     cursor:pointer;
-}
+}*/
 .profile-item{
 }
 .profile-item i {
@@ -44,9 +50,7 @@
     background-size: cover;
 }
 
-table{
-    width:100%;
-}
+
 .happy{
     color:greenyellow;
 }
@@ -89,6 +93,7 @@ table{
      position:absolute;
      left:90%;
  }
+
 .alert{
     position:absolute;
     top: 10px;
@@ -97,15 +102,12 @@ table{
     text-align:center;
     
 }
-.profile-pic:hover:before {
+.editable:hover:before {
     content: url(/images/upload.png);
     height:250px;
     width:250px;
 }
-.img-circle:hover {
 
-    cursor:pointer;
-}
 .profile-content{
     margin-top:75px;
 }

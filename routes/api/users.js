@@ -9,41 +9,14 @@ var UsersRepo = require("../../data/models/usersRepo");
 var passport = require('passport');
 var User = require("../../data/models/user");
 var multer = require('multer');
-var crypto = require('crypto');
-var path = require('path');
-var storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'public/userimages/')
-    },
-    filename: function (req, file, cb) {
-        crypto.pseudoRandomBytes(16, function (err, raw) {
-            if (err) return cb(err)
-            
-            cb(null, raw.toString('hex') + path.extname(file.originalname))
-        })
-    }
 
-});
+var fu = require('../middleware/fileupload');
+var storage = fu.filenameOpts;
 
-
-function fileFilter(req, file, cb) {
-    var AcceptedFileTypes = ["image/jpeg", "image/gif", "image/png","image/bmp"]
-    console.log(req.user);
-    if (req.user && AcceptedFileTypes.indexOf(file.mimetype) > -1) {
-        cb(null, true);
-    }
-    else if (AcceptedFileTypes.indexOf(file.mimetype) == -1 || !req.user) {
-        cb(null, false);
-    }
-    else {
-        cb(new Error('Something happened.'));
-    }
-
-}
 
 var upload = multer({
     storage: storage,
-    fileFilter: fileFilter,
+    fileFilter: fu.fileFilter,
     limits: {
         fileSize: 5 * 1024 * 1024,
         files:1

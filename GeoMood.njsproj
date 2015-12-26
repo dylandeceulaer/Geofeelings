@@ -34,8 +34,11 @@
     <Compile Include="app.js" />
     <Compile Include="config.js" />
     <Compile Include="data\connectDBService.js" />
+    <Compile Include="data\models\comment.js" />
+    <Compile Include="data\models\commentRepo.js" />
     <Compile Include="data\models\user.js" />
     <Compile Include="data\models\usersRepo.js" />
+    <Compile Include="data\schemas\comment.js" />
     <Compile Include="data\schemas\user.js" />
     <Compile Include="public\javascripts\app.js" />
     <Compile Include="public\javascripts\controllers\userController.js" />
@@ -49,8 +52,10 @@
     <Compile Include="public\javascripts\vendor\angular\angular-route.js" />
     <Compile Include="public\javascripts\vendor\angular\angular-sanitize.js" />
     <Compile Include="public\javascripts\vendor\angular\angular.js" />
+    <Compile Include="routes\api\profile.js" />
     <Compile Include="routes\api\users.js" />
     <Compile Include="routes\index.js" />
+    <Compile Include="routes\middleware\fileupload.js" />
     <Compile Include="routes\middleware\load_user.js" />
     <Compile Include="routes\middleware\passport\login.js" />
     <Compile Include="routes\profile.js" />
