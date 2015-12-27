@@ -8,7 +8,7 @@
         oReq.send(param);
     }
     
-    $(".comment-item a").click(function (e) {
+    $(".comment-item.panel-body a").click(function (e) {
         e.preventDefault();
         console.log($(e.target).parent().attr('href').replace("#", ""));
         XHRPost("/api/profile/deleteComment", "id=" + $(e.target).parent().attr('href').replace("#",""), function () {
@@ -17,13 +17,28 @@
             }
         });
     });
-
+    $(".profile-info-item i.fa-pencil").click(function (e){
+        if ($(e.target).hasClass("fa-pencil")) {
+            var item = $(e.target).parent().parent().children(".col-xs-7");
+            var value = item.html();
+            $(e.target).removeClass("fa-pencil").addClass("fa-check");
+            item.html("<input type='text' id='editvalue"+item.attr("id")+"' value='" + value + "'/>");
+        } else if ($(e.target).hasClass("fa-check")) {
+            var item = $(e.target).parent().parent().children(".col-xs-7");
+            $(e.target).removeClass("fa-check").addClass("fa-pencil");
+            item.html($("#editvalue" + item.attr("id") + "").val());
+        }
+    })
     $("#reply").click(function(){
         var comment = $("#replyInput").val();
         if (comment != "") {
             XHRPost("/api/profile/putComment", "owner=" + qryUser._id + "&comment=" + comment, function () {
                 if (this.status == 200) {
-                    $('<div class="comment-item"><div class="col-xs-2"><div style="background-image: url(/userimages/' + user.image + ')" class="img-circle comment-item-image"></div></div><div class="col-xs-10"><div class="panel"><div class="panel-body">' + comment + '</div></div></div></div>').insertBefore($(".comment-body").children().first());
+                    if (user.image) {
+                        $('<div class="comment-item"><div class="col-xs-2"><div title="'+ user.username +'" style="background-image: url(/userimages/' + user.image + ')" class="img-circle comment-item-image"></div></div><div class="col-xs-10"><div class="panel"><div class="panel-body">' + comment + '</div></div></div></div>').insertBefore($(".comment-body").children().first());
+                    } else {
+                        $('<div class="comment-item"><div class="col-xs-2"><div title="' + user.username + '" style="background-image: url(/images/NoPic.jpg)" class="img-circle comment-item-image"></div></div><div class="col-xs-10"><div class="panel"><div class="panel-body">' + comment + '</div></div></div></div>').insertBefore($(".comment-body").children().first());
+                    }
                     $("#replyInput").val("");
                 }
             });
@@ -53,6 +68,30 @@
         
         });
     });
-
+    $(".friend-item i.fa").click(function (e){
+        var item = $(e.target);
+        var id = item.parent().attr("id");
+        
+        if (item.hasClass("fa-check")) {
+            XHRPost("/api/users/acceptFriendship", "id=" + id, function () {
+                if (this.status == 200) {
+                    if ($("#friends-accepted").children().first().length > 0)
+                        $(item.parent().parent().parent().html()).insertBefore($("#friends-accepted").children().first()).children().last().remove();
+                    else
+                        $("#friends-accepted").append(item.parent().parent().parent().html()).children().first().children().last().remove();
+                    item.parent().parent().remove();
+                }
+            });
+        }
+        else if (item.hasClass("fa-times")) {
+            XHRPost("/api/users/denyFriendship", "id=" + id, function () {
+                if (this.status == 200) {
+                    console.log("success");
+                    item.parent().parent().remove();
+                }
+            });
+        }
+        console.log(id);
+    });
     
 })

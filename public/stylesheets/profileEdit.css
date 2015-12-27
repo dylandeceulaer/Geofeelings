@@ -125,3 +125,41 @@
 .comment-item a{
     color:black;
 }
+.line-center{
+    margin:0;padding:0 10px;
+    background:#fff;
+    display:inline-block;
+}
+h6{
+    font-style:italic;
+    text-align:center;
+    position:relative;
+    z-index:2;
+    
+}
+h6:after{
+    content:"";
+    position:absolute;
+    top:50%;
+    left:0;
+    right:0;
+    border-top:solid 1px black;
+    z-index:-1;
+}
+.panel-body-h6{
+    padding-top:0;
+    padding-bottom:0;
+}
+.friend-item-accept{
+    height:140px;
+}
+.friend-item i{
+    margin-right:15px;
+    cursor:pointer;
+}
+.friend-item i.fa-check{
+    color:green;
+}
+.friend-item i.fa-times{
+    color:red;
+}

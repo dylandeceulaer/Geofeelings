@@ -29,48 +29,72 @@ block content
                     .panel-heading
                         h3.panel-title Profile Info
                     .panel-body
-                        .col-xs-3.profile-item-title Name
-                        .col-xs-7 
-                            .text-capitalize.table-content #{user.name}
-                        .col-xs-2 
-                            <i class="fa fa-pencil" title="Public"></i>
-                            <i class="fa fa-eye-slash" title="Public"></i>
-                        .col-xs-3.profile-item-title Lives in
-                        .col-xs-7 Antwerp
-                        .col-xs-2 
-                            <i class="fa fa-pencil" title="Public"></i>
-                            <i class="fa fa-eye" title="Public"></i>
-                        .col-xs-3.profile-item-title Joined
-                        .col-xs-7 #{user.createdOn.toLocaleDateString('be-BE')}
+                        .profile-info-item
+                            .col-xs-3.profile-item-title Name
+                            .col-xs-7.text-capitalize#name
+                                 =user.name
+                            .col-xs-2 
+                                <i class="fa fa-pencil" title="Public"></i>
+                                <i class="fa fa-eye-slash" title="Public"></i>
+                        .profile-info-item
+                            .col-xs-3.profile-item-title Lives in
+                            .col-xs-7#location Antwerp
+                            .col-xs-2 
+                                <i class="fa fa-pencil" title="Public"></i> 
+                                <i class="fa fa-eye" title="Public"></i>
+                        .profile-info-item
+                            .col-xs-3.profile-item-title Joined
+                            .col-xs-7 #{user.createdOn.toLocaleDateString('be-BE')}
                 .panel.panel-default
                     .panel-heading
                         h3.panel-title Friends
+                    .panel-body#friends-accepted
+                        if(user.friends)
+                            each val in user.friends
+                                if(val.isAccepted && !val.isBlocked)
+                                    .friend-item
+                                        a(href="/profile/#{val.user.username}")
+                                            .img-circle.friend-item-image(style=typeof val.user.image === "undefined" ? "" : 'background-image: url(/userimages/#{val.user.image})' )
+                                        p #{val.user.username}
+                    if(user.friends)
+                        -var arePendings = false;
+                        each val in user.friends
+                            if(!val.isAccepted && !val.isRequest && !val.isBlocked)
+                                if(!arePendings)
+                                    .panel-body.panel-body-h6#friends-pending
+                                        h6
+                                            span.line-center Approval pending
+                                    -arePendings = true;
+                                -break
                     .panel-body
-                        .friend-item
-                            .img-circle.friend-item-image(style= 'background-image: url(/userimages/8cbcb325a24560d2dccbac1a85511351.jpg)' )
-                            p Rick Jones
-                        .friend-item
-                            .img-circle.friend-item-image(style= 'background-image: url(/userimages/2f145616049bbdfe80077b778cc6f6be.png)' )
-                            p Fredrick Moss
-                        .friend-item
-                            .img-circle.friend-item-image(style= 'background-image: url(/userimages/8cbcb325a24560d2dccbac1a85511351.jpg)' )
-                            p Rick Jones
-                        .friend-item
-                            .img-circle.friend-item-image(style= 'background-image: url(/userimages/2f145616049bbdfe80077b778cc6f6be.png)' )
-                            p Fredrick Moss
-                        .friend-item
-                            .img-circle.friend-item-image(style= 'background-image: url(/userimages/8cbcb325a24560d2dccbac1a85511351.jpg)' )
-                            p Rick Jones
-                        .friend-item
-                            .img-circle.friend-item-image(style= 'background-image: url(/userimages/2f145616049bbdfe80077b778cc6f6be.png)' )
-                            p Fredrick Moss
-                        .friend-item
-                            .img-circle.friend-item-image(style= 'background-image: url(/userimages/8cbcb325a24560d2dccbac1a85511351.jpg)' )
-                            p Rick Jones
-                        .friend-item
-                            .img-circle.friend-item-image(style= 'background-image: url(/userimages/2f145616049bbdfe80077b778cc6f6be.png)' )
-                            p Fredrick Moss
-                                     
+                        each val in user.friends
+                            if(!val.isAccepted && !val.isRequest && !val.isBlocked)
+                                .friend-item
+                                    a(href="/profile/#{val.user.username}")
+                                        .img-circle.friend-item-image(style=typeof val.user.image === "undefined" ? "" : 'background-image: url(/userimages/#{val.user.image})' )
+                                    i #{val.user.username}
+                    
+                    if(user.friends)
+                        -var areApproval = false;
+                        each val in user.friends
+                            if(!val.isAccepted && val.isRequest && !val.isBlocked)
+                                if(!areApproval)
+                                    .panel-body.panel-body-h6#friends-request
+                                        h6
+                                            span.line-center Friendship requests
+                                    -areApproval = true;
+                                -break
+                    .panel-body
+                        each val in user.friends
+                            if(!val.isAccepted && val.isRequest && !val.isBlocked)
+                                .friend-item.friend-item-accept
+                                    a(href="/profile/#{val.user.username}")
+                                        .img-circle.friend-item-image(style=typeof val.user.image === "undefined" ? "" : 'background-image: url(/userimages/#{val.user.image})' )
+                                    i #{val.user.username} 
+                                    br
+                                    div(id=val.user._id)
+                                        i.fa.fa-check
+                                        i.fa.fa-times
             .col-lg-7         
                    
                 .panel.panel-default
@@ -91,7 +115,9 @@ block content
                                 -console.log(val.author)
                                 .comment-item    
                                     .col-xs-2
-                                        .img-circle.comment-item-image(style= 'background-image: url(/userimages/#{val.author.image})' )
+                                        a(href="/profile/#{val.author.username}")
+                                            .img-circle.comment-item-image(title="#{val.author.username}" style=typeof val.author.image === "undefined" ? "" : 'background-image: url(/userimages/#{val.author.image})' )
+
                                     .panel.col-xs-10
                                         .panel-body
                                             .col-xs-11
@@ -99,4 +125,7 @@ block content
                                             .col-xs-1
                                                 a(href="##{val._id}") 
                                                     i.fa.fa-remove
+                        else
+                            .col-xs-12
+                                i No comments yet.      
                        

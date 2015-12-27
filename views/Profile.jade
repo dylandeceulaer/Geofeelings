@@ -42,33 +42,18 @@ block content
                     .panel-heading
                         h3.panel-title Friends
                     .panel-body
-                        .friend-item
-                            .img-circle.friend-item-image(style= 'background-image: url(/userimages/8cbcb325a24560d2dccbac1a85511351.jpg)' )
-                            p Rick Jones
-                        .friend-item
-                            .img-circle.friend-item-image(style= 'background-image: url(/userimages/2f145616049bbdfe80077b778cc6f6be.png)' )
-                            p Fredrick Moss
-                        .friend-item
-                            .img-circle.friend-item-image(style= 'background-image: url(/userimages/8cbcb325a24560d2dccbac1a85511351.jpg)' )
-                            p Rick Jones
-                        .friend-item
-                            .img-circle.friend-item-image(style= 'background-image: url(/userimages/2f145616049bbdfe80077b778cc6f6be.png)' )
-                            p Fredrick Moss
-                        .friend-item
-                            .img-circle.friend-item-image(style= 'background-image: url(/userimages/8cbcb325a24560d2dccbac1a85511351.jpg)' )
-                            p Rick Jones
-                        .friend-item
-                            .img-circle.friend-item-image(style= 'background-image: url(/userimages/2f145616049bbdfe80077b778cc6f6be.png)' )
-                            p Fredrick Moss
-                        .friend-item
-                            .img-circle.friend-item-image(style= 'background-image: url(/userimages/8cbcb325a24560d2dccbac1a85511351.jpg)' )
-                            p Rick Jones
-                        .friend-item
-                            .img-circle.friend-item-image(style= 'background-image: url(/userimages/2f145616049bbdfe80077b778cc6f6be.png)' )
-                            p Fredrick Moss
+                        if(qryUser.friends)
+                            each val in qryUser.friends
+                                if(val.isAccepted && !val.isBlocked)
+                                    .friend-item
+                                        a(href="/profile/#{val.user.username}")
+                                            .img-circle.friend-item-image(style=typeof val.user.image === "undefined" ? "" : 'background-image: url(/userimages/#{val.user.image})' )
+                                        p #{val.user.username}
+
+                        else
+                            i No friends yet :(
                                      
             .col-lg-7         
-                   
                 .panel.panel-default
                     .panel-heading
                         h3.panel-title Recent Actions
@@ -86,10 +71,15 @@ block content
                             each val in qryUser.comments
                                 .comment-item    
                                     .col-xs-2
-                                        .img-circle.comment-item-image(style= 'background-image: url(/userimages/#{val.author.image})' )
+                                        a(href="/profile/#{val.author.username}")
+                                            .img-circle.comment-item-image(title="#{val.author.username}" style=typeof val.author.image === "undefined" ? "" : 'background-image: url(/userimages/#{val.author.image})' )
                                     .col-xs-10
                                         .panel
-                                            .panel-body #{val.comment}     
+                                            .panel-body #{val.comment}
+                        else
+                            .col-xs-12
+                                i No comments yet.                    
+                           
                                 
                                 
                          .col-xs-12

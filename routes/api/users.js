@@ -73,6 +73,42 @@ router.get('/addFriend/:id', function (req, res) {
         });
     }
 });
+router.post('/acceptFriendship', function (req, res) {
+    if (!req.user) {
+        res.status(401);
+        res.send("you need to be logged in to post a comment.");
+    } else {
+        var id = req.body.id;
+        UsersRepo.acceptFriendshipRequest(req.user._id, id, function (err , result) {
+            if (err) {
+                console.error(err);
+                res.status(500);
+                res.send('something went wrong');
+            } else {
+                res.status(200);
+                res.send("success");
+            }
+        });
+    }
+});
+router.post('/denyFriendship', function (req, res) {
+    if (!req.user) {
+        res.status(401);
+        res.send("you need to be logged in to post a comment.");
+    } else {
+        var id = req.body.id;
+        UsersRepo.blockFriendship(req.user._id, id, function (err , result) {
+            if (err) {
+                console.error(err);
+                res.status(500);
+                res.send('something went wrong');
+            } else {
+                res.status(200);
+                res.send("success");
+            }
+        });
+    }
+});
 router.post('/login', passport.authenticate('local'), function (req, res) {
     
         if (req.user) {

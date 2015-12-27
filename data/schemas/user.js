@@ -5,8 +5,19 @@
 
 var mongoose = require('mongoose');
 var passportLocalMongoose = require('passport-local-mongoose');
+var Friend = new mongoose.Schema({
+    user: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User', 
+        required: true
+    },
+    isRequest: { type: Boolean },
+    isAccepted: { type: Boolean },
+    isBlocked: { type: Boolean, 'default': false }
 
-var UserSchema = new mongoose.Schema({
+});
+
+var UserSchema = new mongoose.Schema( {
     username: {
         type: String, 
         unique: true, 
@@ -26,11 +37,7 @@ var UserSchema = new mongoose.Schema({
     image: {
         type: String,
     },
-    friends: [{
-        type: mongoose.Schema.ObjectId,
-        ref: 'User', 
-        required: true
-    }],
+    friends: [ Friend],
     
     createdOn: { type: Date, 'default': Date.now },
     lastLogin: Date
@@ -49,7 +56,9 @@ UserSchema.path("password").validate(function (v) {
     return v.length >= 5;
 }, 'Your username must contain 6 or more characters.');
 
-UserSchema.plugin(passportLocalMongoose);
+
+var options = ({ populateFields: "friends.user" });
+UserSchema.plugin(passportLocalMongoose, options);
 
 
 module.exports = UserSchema;
