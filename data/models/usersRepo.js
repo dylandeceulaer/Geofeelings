@@ -28,36 +28,52 @@ UsersRepo = (function () {
                 next(user);
             });
         },
-
-        findUser = function (username, next) {
+        findUserCheck = function (username, next) {
             User.find({ username: username }).populate('friends').populate('friends.user').exec(function (err, res) {
-                next(err, res);
+                if (err) {
+                    console.log(err);
+                    next(err);
+                } else {
+                    next(null, res);
+                }
+                
             });
         },
-        updateUser = function (originalUsername,updatevalues,cb) {
-            User.update({ username: originalUsername }, updatevalues, { runValidators: false }, function (error, result) {
+        findUser = function (username,currentUserId, next) {
+            User.find({ username: username }).populate('friends').populate('friends.user').exec(function (err, res) {
+                if (err) {
+                    console.log(err);
+                    next(err);
+                } else {
+                    isFriend(res[0]._id, currentUserId, function (result) {
+                        res[0].isFriend = result;
+                        next(null, res);
+                    });
+                    
+                }
+                
+            });
+        },
+        updateUser = function (id,updatevalues,next) {
+            User.update({ _id: id }, updatevalues, { runValidators: false }, function (error, result) {
                 if (error) {
                     
                     console.error(error);
                     if (error.code == 11000) {
-                        if (cb)
-                            return cb("Duplicate key!", null);
-                    }
-                    else if (error.name == "ValidationError") {
-                        if (cb)
-                            return cb("ValidationError", { originalUsername: originalUsername, username: username, name: name, gender: gender, age: age, errors: error.errors })
+                        if (next)
+                            return next("Duplicate key!", null);
                     }
                     else
-                        if (cb)
-                            return cb(error, null);
+                        if (next)
+                            return next(error, null);
                 }
                 else if (!result) {
-                    if (cb)
-                        return cb("No records found!", null);
+                    if (next)
+                        return next("No records found!", null);
                 }
                 else {
-                    if (cb)
-                        return cb(null, result);
+                    if (next)
+                        return next(null, result);
                 }
             });
         },
@@ -69,24 +85,35 @@ UsersRepo = (function () {
         addFriend = function (User1Id, User2Id,next){
             User.findOne({ _id: User1Id }, function (err, res) {
                 if (!err) {
-                    res.friends.push({user: User2Id,isRequest: false,isAccepted:false});
-                    res.save(function (err,result) {
+                    res.friends.push({ user: User2Id, isRequest: false, isAccepted: false });
+                    res.save(function (err, result) {
                         if (!err) {
                             User.findOne({ _id: User2Id }, function (err, res2) {
                                 if (!err) {
-                                    res2.friends.push({ user: User1Id, isRequest: true,isAccepted:false });
+                                    res2.friends.push({ user: User1Id, isRequest: true, isAccepted: false });
                                     res2.save(function (err, result2) {
                                         if (!err) {
                                             return next(null, result);
+                                        } else {
+                                            console.log(err);
+                                            return next("something went wrong");
                                         }
                                     });
+                                } else {
+                                    console.log(err);
+                                    return next("something went wrong");
                                 }
-                                return next("something went wrong");
                             });
                         }
+                        else {
+                            console.log(err);
+                            return next("something went wrong");
+                        }
                     });
+                } else {
+                    console.log(err);
+                    return next("something went wrong");
                 }
-                return next("something went wrong");
             });
         },
         acceptFriendshipRequest = function (User1Id, User2Id, next) {
@@ -122,6 +149,18 @@ UsersRepo = (function () {
                         }
                     });
                 }
+            });
+},
+        isFriend = function (User1Id, User2Id, next){
+            User.find({ _id: User1Id, "friends.user" : User2Id }, function (err, res) {
+                
+                if (err)
+                    next(false);
+                if (res.length > 0)
+                    next(true);
+                else
+                    next(false);
+                    
             });
         }
             
@@ -167,7 +206,8 @@ UsersRepo = (function () {
         createUser: createUser,
         addFriend: addFriend,
         acceptFriendshipRequest: acceptFriendshipRequest,
-        blockFriendship: blockFriendship
+        blockFriendship: blockFriendship,
+        findUserCheck : findUserCheck
     };
 })();
 

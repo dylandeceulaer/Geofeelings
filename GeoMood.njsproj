@@ -56,6 +56,7 @@
     <Compile Include="routes\api\users.js" />
     <Compile Include="routes\index.js" />
     <Compile Include="routes\middleware\fileupload.js" />
+    <Compile Include="routes\middleware\friendCheck.js" />
     <Compile Include="routes\middleware\load_user.js" />
     <Compile Include="routes\middleware\passport\login.js" />
     <Compile Include="routes\profile.js" />

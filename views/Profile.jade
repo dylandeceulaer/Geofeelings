@@ -23,7 +23,8 @@ block content
         .profile-content.container
             .profile-heading
                 =qryUser.username
-                <a href="/api/users/addFriend/#{qryUser._id}"><i class="fa fa-user-plus"></i></a>
+                if(!qryUser.isFriend)
+                    <i id="#{qryUser._id}" class="fa fa-user-plus"></i>
             .col-lg-5
                 .panel.panel-default
                     .panel-heading
@@ -32,9 +33,9 @@ block content
                         .col-xs-3.profile-item-title Name
                         .col-xs-7 
                             .text-capitalize.table-content #{qryUser.name}
-                        
-                        .col-xs-3.profile-item-title Lives in
-                        .col-xs-7 Antwerp
+                        if(qryUser.location)
+                            .col-xs-3.profile-item-title Lives in
+                            .col-xs-7 #{qryUser.location}
                         .col-xs-3.profile-item-title Joined
                         .col-xs-7 #{qryUser.createdOn.toLocaleDateString()}
                 

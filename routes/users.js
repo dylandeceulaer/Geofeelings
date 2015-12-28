@@ -20,10 +20,7 @@ router.get('/', function (req, res) {
 });
 
 
-/* CREATE user */
-router.get('/new', function (req, res) {
-    res.render('users/create', { title: "Nieuwe gebruiker." });
-});
+
 
 router.post('/', function (req, res, next) {
     UsersRepo.createUser(req.body, function (next) {

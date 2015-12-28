@@ -19,22 +19,31 @@ html(lang="en")
                         span.icon-bar
                         span.icon-bar
                         span.icon-bar
-                    
-                    a#logoLink.navbar-brand.page-scroll(href= "#home")
-                        img(src="/images/LogoTextOnly.png")
+                    if(!user)
+                        a#logoLink.navbar-brand.page-scroll(href= "#home")
+                            img(src="/images/LogoTextOnly.png")
+                    if(user)
+                        a#logoLink.navbar-brand.page-scroll(href= "/")
+                            img(src="/images/LogoTextOnly.png")
 
 
                 #navbar.collapse.navbar-collapse
                     ul.nav.navbar-nav
-                        li.active.page-scroll.homeLi
-                            a(href="#home") Home
+                        if(user)
+                            li.page-scroll.homeLi(class= ( activeLi == 'index' ? "active" : ""))
+                                    a(href="/") Home
                         if(!user)
+                            li.page-scroll.homeLi(class= ( activeLi == 'index' ? "active" : ""))
+                                a(href="#home") Home
                             li.page-scroll
                                 a#Login(href="#next") Log in
                             li.page-scroll
                                 a(href="#next2") Sign up
                             li.page-scroll
                                 a(href="#info") Info
+                        if(specialNav)
+                           li(class= ( activeLi == 'specialnav' ? "active" : ""))
+                                a(href="#{specialNav.href} ") #{specialNav.name} 
                     if(user)
                         ul.nav.navbar-nav.nav-right
                             +nav_item_dropdown("#")(label="#{user.username}")

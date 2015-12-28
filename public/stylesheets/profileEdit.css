@@ -1,5 +1,6 @@
 ﻿body {
 }
+
 .PageFiller{
     min-height:100%;
     background-color:#efefef;
@@ -13,9 +14,15 @@
     display:inline;
 
 }
-.col-xs-2 i{
-    margin-right:5px;
+.col-xs-1 i{
    cursor:pointer;
+}
+
+.fa-pencil{
+    margin-right:5px;
+}
+.fa-check{
+    margin-right:4px;
 }
 .profile-item-title{
     font-weight:bold;
@@ -33,9 +40,12 @@
     margin-right:15px;
     cursor: pointer;
 }
-.profile-heading a{
+.profile-heading i{
     margin-left:15px;
-    font-size: 35px;
+    font-size: 30px;
+    cursor:pointer;
+    padding-top:13px;
+    color:#0a6ebd;
 }
 .panel{
     text-align:left;
@@ -106,6 +116,7 @@
     content: url(/images/upload.png);
     height:250px;
     width:250px;
+    cursor:pointer;
 }
 
 .profile-content{

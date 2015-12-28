@@ -23,9 +23,8 @@ var upload = multer({
     }
 });
 
-
 router.get('/:username?', function (req, res) {
-    UsersRepo.findUser(req.params.username, function (err , result) {
+    UsersRepo.findUserCheck(req.params.username,function (err , result) {
         if (err) {
             res.status(500);
             res.send('Internal server Error');
@@ -61,15 +60,43 @@ router.get('/byemail/:email?', function (req, res) {
     });
 });
 
-router.get('/addFriend/:id', function (req, res) {
+router.post('/addFriend', function (req, res) {
     if (!req.user) {
         res.status(401);
         res.send("you need to be logged in to post a comment.");
     } else {
-        var id = req.params.id;
+        var id = req.body.id;
         UsersRepo.addFriend(req.user._id, id, function (err , result) {
-            console.log(err);
-            console.log(result);
+            if (err) {
+                console.error(err);
+                res.status(500);
+                res.send('something went wrong');
+            } else {
+                res.status(200);
+                res.send("success");
+            }
+        });
+    }
+});
+router.post('/update', function (req, res) {
+    if (!req.user) {
+        res.status(401);
+        res.send("you need to be logged in.");
+    } else {
+        var updatevalues = {};
+        if (req.body.name)
+            updatevalues.name = req.body.name;
+        if (req.body.location)
+            updatevalues.location = req.body.location;
+        UsersRepo.updateUser(req.user._id, updatevalues, function (err , result) {
+            if (err) {
+                console.error(err);
+                res.status(500);
+                res.send('something went wrong');
+            } else {
+                res.status(200);
+                res.send("success");
+            }
         });
     }
 });
@@ -79,11 +106,11 @@ router.post('/acceptFriendship', function (req, res) {
         res.send("you need to be logged in to post a comment.");
     } else {
         var id = req.body.id;
+        console.log("test");
         UsersRepo.acceptFriendshipRequest(req.user._id, id, function (err , result) {
             if (err) {
                 console.error(err);
                 res.status(500);
-                res.send('something went wrong');
             } else {
                 res.status(200);
                 res.send("success");

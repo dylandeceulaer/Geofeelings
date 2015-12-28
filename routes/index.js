@@ -7,9 +7,9 @@ var User = require("../data/models/user");
 /* GET home page. */
 router.get('/', function (req, res) {
     if(req.user)
-        res.render('indexAuthorized', { title: 'GeoMood - How do you feel today?', user : req.user });
+        res.render('indexAuthorized', { title: 'GeoMood - How do you feel today?', user : req.user,specialNav:null, activeLi:"index" });
     else
-        res.render('indexUnauthorized', { title: 'GeoMood - How do you feel today?'});
+        res.render('indexUnauthorized', { title: 'GeoMood - How do you feel today?', specialNav: null, activeLi: "index"});
    // res.redirect('/users');
 });
 

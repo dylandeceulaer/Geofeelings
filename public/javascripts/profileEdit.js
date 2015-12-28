@@ -8,7 +8,7 @@
         oReq.send(param);
     }
     
-    $(".comment-item.panel-body a").click(function (e) {
+    $(".comment-item .panel-body a").click(function (e) {
         e.preventDefault();
         console.log($(e.target).parent().attr('href').replace("#", ""));
         XHRPost("/api/profile/deleteComment", "id=" + $(e.target).parent().attr('href').replace("#",""), function () {
@@ -19,14 +19,20 @@
     });
     $(".profile-info-item i.fa-pencil").click(function (e){
         if ($(e.target).hasClass("fa-pencil")) {
-            var item = $(e.target).parent().parent().children(".col-xs-7");
+            var item = $(e.target).parent().parent().children(".col-xs-8");
             var value = item.html();
             $(e.target).removeClass("fa-pencil").addClass("fa-check");
             item.html("<input type='text' id='editvalue"+item.attr("id")+"' value='" + value + "'/>");
         } else if ($(e.target).hasClass("fa-check")) {
-            var item = $(e.target).parent().parent().children(".col-xs-7");
-            $(e.target).removeClass("fa-check").addClass("fa-pencil");
-            item.html($("#editvalue" + item.attr("id") + "").val());
+            var item = $(e.target).parent().parent().children(".col-xs-8");
+            console.log($(item.attr("id")).val());
+            XHRPost("/api/users/update", item.attr("id")+"=" + $("#editvalue" + item.attr("id")).val(), function () {
+                if (this.status == 200) {
+                    $(e.target).removeClass("fa-check").addClass("fa-pencil");
+                    item.html($("#editvalue" + item.attr("id")).val());
+                }
+            });
+
         }
     })
     $("#reply").click(function(){
@@ -92,6 +98,14 @@
             });
         }
         console.log(id);
+    });
+
+    $(".profile-heading i").click(function (e) {
+        XHRPost("/api/users/addFriend", "id=" + $(e.target).attr("id"), function () {
+            if (this.status == 200) {
+                $(e.target).remove();
+            }
+        });
     });
     
 })

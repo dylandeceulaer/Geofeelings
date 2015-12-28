@@ -31,17 +31,16 @@ block content
                     .panel-body
                         .profile-info-item
                             .col-xs-3.profile-item-title Name
-                            .col-xs-7.text-capitalize#name
+                            .col-xs-8.text-capitalize#name
                                  =user.name
-                            .col-xs-2 
+                            .col-xs-1 
                                 <i class="fa fa-pencil" title="Public"></i>
-                                <i class="fa fa-eye-slash" title="Public"></i>
+
                         .profile-info-item
-                            .col-xs-3.profile-item-title Lives in
-                            .col-xs-7#location Antwerp
-                            .col-xs-2 
+                            .col-xs-3.profile-item-title Location
+                            .col-xs-8#location #{user.location}
+                            .col-xs-1 
                                 <i class="fa fa-pencil" title="Public"></i> 
-                                <i class="fa fa-eye" title="Public"></i>
                         .profile-info-item
                             .col-xs-3.profile-item-title Joined
                             .col-xs-7 #{user.createdOn.toLocaleDateString('be-BE')}

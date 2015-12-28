@@ -37,7 +37,10 @@ var UserSchema = new mongoose.Schema( {
     image: {
         type: String,
     },
-    friends: [ Friend],
+    friends: [Friend],
+    location: {
+        type: String,
+    },
     
     createdOn: { type: Date, 'default': Date.now },
     lastLogin: Date

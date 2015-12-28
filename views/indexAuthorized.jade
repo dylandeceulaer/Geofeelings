@@ -12,10 +12,13 @@ append scripts
     </script>
 
 block content
-
-    .PageFiller#googlemap
-        Google maps don't seem to be able to run.           
-            
+    .PageFiller#wrapper
+        #googlemap
+            Google Maps is loading or unable to load.          
+        .Sidebar#sidebar-wrapper
+            #sidebar-heading 
+                p Overview
+                
                 
     .container
         p(id="about") Welcome to #{title}
