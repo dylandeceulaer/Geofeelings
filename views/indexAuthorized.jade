@@ -1,25 +1,63 @@
 extends shared/starter
 
 append styles
+    link(href='stylesheets/awesomplete.css', rel='stylesheet')
     link(href='stylesheets/index.css', rel='stylesheet')
     link(href='stylesheets/css/font-awesome.css', rel='stylesheet')
+
     
 append scripts
     script(src='http://code.jquery.com/ui/1.10.3/jquery-ui.js')
     script(src='/javascripts/effects.js')
     script(src='/javascripts/map.js')
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCs_9qVC8-LjAinVOR0zY64frEZTCxqoeU&callback=initMap">
+    script(src='/javascripts/indexAuthorized.js')
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCs_9qVC8-LjAinVOR0zY64frEZTCxqoeU&libraries=places&callback=initMap">
+    <script src="/javascripts/awesomplete.js" async></script>
     </script>
 
 block content
     .PageFiller#wrapper
+        #StatusOverlay
+            img(src="/images/HappyPin.png")
+            img(src="/images/UnhappyPin.png")
         #googlemap
-            Google Maps is loading or unable to load.          
+            Google Maps is loading or unable to load.  
+        .sidebar-label
+            #menu-toggle Toggle Sidebar      
         .Sidebar#sidebar-wrapper
             #sidebar-heading 
-                p Overview
-                
-                
+                form#search
+                    .input-group
+                        input.awesomplete#searchInput(type="text" class="form-control" placeholder="Search a location..." )
+                        span(class="input-group-btn")
+                            button(class="btn btn-default" type="submit")
+                                i.fa.fa-search
+            .panel-group#accordion(role="tablist" aria-multiselectable="true")
+                .panel.panel-default
+                    .panel-heading#headingOne(role="tab" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne")
+                        h4.panel-title
+                            a(role="button" )
+                                ='Local Activity'
+                    #collapseOne.panel-collapse.collapse.in(role="tabpanel" aria-labelledby="headingOne")
+                        .panel-body
+                            Hey dit is de body en al
+                .panel.panel-default
+                    .panel-heading#headingTwo(role="tab" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo")
+                        h4.panel-title
+                            a(role="button" )
+                                ='Events'
+                    #collapseTwo.panel-collapse.collapse(role="tabpanel" aria-labelledby="headingTwo")
+                        .panel-body
+                            Hey dit is de body en al
+                .panel.panel-default
+                    .panel-heading#headingThree(role="tab" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="true" aria-controls="collapseThree")
+                        h4.panel-title
+                            a(role="button")
+                                ='Friend Activity'
+                    #collapseThree.panel-collapse.collapse(role="tabpanel" aria-labelledby="headingThree")
+                        .panel-body
+                            Hey dit is de body en al
+        
     .container
         p(id="about") Welcome to #{title}
         +alert-info("This is a sample info alert.")
