@@ -4,7 +4,6 @@ var passport = require('passport');
 var User = require("../data/models/user");
 var UsersRepo = require("../data/models/usersRepo");
 var CommentRepo = require("../data/models/commentRepo");
-var friendCheck = require('./middleware/friendCheck.js');
 
 
 router.get('/', function (req, res) {

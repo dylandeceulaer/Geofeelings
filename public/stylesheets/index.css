@@ -97,7 +97,14 @@ h1 {
     text-align: center;
     float: none;
     margin: 0 auto;
-    width: 500px;
+    max-width: 500px;
+}
+@media screen and (max-width: 500px) {
+    .col-xs-3, .col-xs-7, .col-xs-8, .col-xs-1{
+        padding-left:0;
+    }
+    
+
 }
 
 @media screen and (max-width: 600px) {
@@ -113,7 +120,7 @@ h1 {
 }
 
 .signup {
-    width: 500px;
+    max-width: 500px;
 }
 
 .formHighlight {
@@ -353,9 +360,14 @@ h1 {
 }
 
 #StatusOverlay{
+    text-align:center;
+    text-transform:uppercase;
+    color:#efefef;
+    font-weight:bold;
     position:absolute;
     z-index:1000;
-    padding:15px;
+    background-color: rgba(140,140,140,0.5);
+    padding:10px 15px;
     cursor: -webkit-grab; cursor: -moz-grab;
 }
 #StatusOverlay img{
@@ -370,6 +382,9 @@ h1 {
 @media (max-width:767px) {
     .sidebar-label {
         display: block;
+    }
+    h1{
+        font-size:8vw;
     }
     #wrapper {
         padding-right: 0;

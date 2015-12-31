@@ -152,18 +152,20 @@ router.post('/login', passport.authenticate('local'), function (req, res) {
 router.post('/uploadImage', upload.single('image'), function (req, res) {
     console.log(req.file);
     if (req.file) {
-        UsersRepo.updateUser(req.user.username, { image: req.file.filename }, function (err,result){
+        UsersRepo.updateUser(req.user._id, { image: req.file.filename }, function (err,result){
             if (result) {
                 res.status(200);
                 res.send(req.file.filename);
             } else {
                 res.status(204);
+                console.log(err);
                 res.send('Unsuccessful');
             }
         })
     }
     else {
         res.status(204);
+        console.log("een fout hier: " + req.file);
         res.send('Unsuccessful');
     }
 });

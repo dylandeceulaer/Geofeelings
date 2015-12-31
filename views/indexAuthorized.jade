@@ -8,6 +8,7 @@ append styles
     
 append scripts
     script(src='http://code.jquery.com/ui/1.10.3/jquery-ui.js')
+    script(src="/javascripts/jquery.ui.touch-punch.js")
     script(src='/javascripts/effects.js')
     script(src='/javascripts/map.js')
     script(src='/javascripts/indexAuthorized.js')
@@ -17,7 +18,8 @@ append scripts
 
 block content
     .PageFiller#wrapper
-        #StatusOverlay
+        #StatusOverlay How are you feeling?
+            br
             img(src="/images/HappyPin.png")
             img(src="/images/UnhappyPin.png")
         #googlemap
