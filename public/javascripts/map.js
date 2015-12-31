@@ -189,13 +189,29 @@ function initMapDependencies() {
                     radius: 30
                 });
                 service = (service === undefined)? new google.maps.places.PlacesService(map) : service;
-                service.nearbySearch({ 'location': ll, "radius": 100 }, function (results, status) {
+                service.nearbySearch({ 'location': ll, "radius": 30 }, function (results, status) {
                     if (status == google.maps.places.PlacesServiceStatus.OK) {
-                        if(results[1]){
-                            moodCircle.name = results[1].name;
+                        if (results[1]) {
+                            if (results.length > 2) {
+                                moodCircle.name = results[1].name;
+                                console.log(results)
+                                moodCircle.city = results[results.length - 1].name;
+                            } else {
+                                moodCircle.name = results[0].name;
+                                console.log(results)
+                                moodCircle.city = results[1].name;
+                            }
                             
                         } else {
-                            console.log(results)
+                            service.nearbySearch({ 'location': ll, "radius": 100 }, function (results, status) {
+                                if (status == google.maps.places.PlacesServiceStatus.OK) {
+                                    if (results[1]) {
+                                        moodCircle.name = results[1].name;
+                                        moodCircle.city = results[0].name;
+                                    } else
+                                        moodCircle.name = "Unknown location, " + results[0].name;
+                                }
+                            });
                         }
                     }
                 });
@@ -206,6 +222,7 @@ function initMapDependencies() {
                     map.setCenter(moodCircle.center);
                     map.setZoom(18);
                     console.log(moodCircle.name);
+                    console.log(moodCircle.city);
                 });
 
             }
@@ -260,4 +277,38 @@ $(function () {
             }
         });
     });
+
+    $("#addEvent").click(function (e){
+        var loc = map.getCenter();
+    
+        var cords = [
+            { lng: loc.lng() + 0.002, lat: (loc.lat() + 0.001) },
+            { lng: loc.lng() + 0.002, lat: loc.lat() -0.001 },
+            { lng: loc.lng() - 0.002, lat: loc.lat() - 0.001 },
+            { lng: loc.lng() - 0.002, lat: loc.lat() + 0.001}
+        ];
+        var rectangle = new google.maps.Polygon({
+            paths: cords,
+            editable: true,
+            strokeWeight: 0,
+            fillColor: '#999',
+            draggable: true,
+            map:map
+        });
+        rectangle.setMap(map);
+        rectangle.addListener("dragend", function (e){
+            console.log(e);
+        })
+        google.maps.event.addListener(rectangle, 'click', function () {
+            google.maps.event.addListener(rectangle.getPath(), 'set_at', function () {
+                console.log("test");
+            });
+            
+            google.maps.event.addListener(rectangle.getPath(), 'insert_at', function () {
+                console.log("test");
+            });
+            setSelection(newShape);
+        });
+        console.log(rectangle);
+    })
 });

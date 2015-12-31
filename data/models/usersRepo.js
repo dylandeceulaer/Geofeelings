@@ -7,6 +7,8 @@ var mongoose = require("mongoose");
 
 UsersRepo = (function () {
     var User = require("./user.js");
+    var Role = require("./role.js");
+    RoleRepo = require('./roleRepo.js');
      
     var getAllUsers = function (next) {
         User.find({}).sort('name').exec(function (err, docs) {
@@ -23,13 +25,14 @@ UsersRepo = (function () {
             //next combineert err & success
             //typeof(user) ==="object"
             user.creationDate = new Date();
+            user.role = role.ROLES.User.id;
             User.create(user, function (err) {
                 if (err) { return next(err); }
                 next(user);
             });
         },
         findUserCheck = function (username, next) {
-            User.find({ username: username }).populate('friends').populate('friends.user').exec(function (err, res) {
+            User.find({ username: username }).populate('friends').populate('role').populate('friends.user').exec(function (err, res) {
                 if (err) {
                     console.log(err);
                     next(err);
@@ -40,7 +43,7 @@ UsersRepo = (function () {
             });
         },
         findUser = function (username,currentUserId, next) {
-            User.find({ username: username }).populate('friends').populate('friends.user').exec(function (err, res) {
+            User.find({ username: username }).populate('friends').populate('role').populate('friends.user').exec(function (err, res) {
                 if (err) {
                     console.log(err);
                     next(err);
@@ -162,7 +165,7 @@ UsersRepo = (function () {
                     next(false);
                     
             });
-        }
+        },
             
             //User.findOne({ _id: User1Id, "friends.user" : User2Id }, function (err, res) {
             //    if (!err) {
@@ -197,6 +200,11 @@ UsersRepo = (function () {
             //});
         
     
+        setDefaultValues = function (role){
+            User.register(new User({ username : "docent@nmct", name : "Admin Account", email : "admin@howest.be", role: RoleRepo.ROLES.Admin.id }), "docent1@nmct", function (err, account) {
+            })
+        }
+
     return {
         model : User ,
         getAllUsers: getAllUsers,
@@ -207,7 +215,8 @@ UsersRepo = (function () {
         addFriend: addFriend,
         acceptFriendshipRequest: acceptFriendshipRequest,
         blockFriendship: blockFriendship,
-        findUserCheck : findUserCheck
+        findUserCheck : findUserCheck,
+        setDefaultValues : setDefaultValues
     };
 })();
 

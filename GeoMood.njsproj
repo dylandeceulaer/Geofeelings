@@ -36,9 +36,12 @@
     <Compile Include="data\connectDBService.js" />
     <Compile Include="data\models\comment.js" />
     <Compile Include="data\models\commentRepo.js" />
+    <Compile Include="data\models\roleRepo.js" />
+    <Compile Include="data\models\role.js" />
     <Compile Include="data\models\user.js" />
     <Compile Include="data\models\usersRepo.js" />
     <Compile Include="data\schemas\comment.js" />
+    <Compile Include="data\schemas\role.js" />
     <Compile Include="data\schemas\user.js" />
     <Compile Include="public\javascripts\app.js" />
     <Compile Include="public\javascripts\awesomplete.min.js" />
@@ -48,6 +51,7 @@
     <Compile Include="public\javascripts\index.js" />
     <Compile Include="public\javascripts\indexAuthorized.js" />
     <Compile Include="public\javascripts\indexEffects.js" />
+    <Compile Include="public\javascripts\jquery.ui.touch-punch.js" />
     <Compile Include="public\javascripts\map.js" />
     <Compile Include="public\javascripts\profileEdit.js" />
     <Compile Include="public\javascripts\services\userService.js" />

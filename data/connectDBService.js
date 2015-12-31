@@ -34,5 +34,7 @@ module.exports = (function (configURL, database) {
         console.log("connection closed: ", configURL);
     });
     
+    
+    
     return database; // mongoose connected
 });

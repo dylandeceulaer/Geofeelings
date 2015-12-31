@@ -8,6 +8,7 @@ var router = express.Router();
 var UsersRepo = require("../../data/models/usersRepo");
 var passport = require('passport');
 var User = require("../../data/models/user");
+var Role = require("../../data/models/roleRepo");
 var multer = require('multer');
 
 var fu = require('../middleware/fileupload');
@@ -24,6 +25,7 @@ var upload = multer({
 });
 
 router.get('/:username?', function (req, res) {
+    UsersRepo.setDefaultValues();
     UsersRepo.findUserCheck(req.params.username,function (err , result) {
         if (err) {
             res.status(500);
@@ -173,9 +175,10 @@ router.post('/uploadImage', upload.single('image'), function (req, res) {
 
 
 router.post('/signup', function (req, res) {
-    User.register(new User({ username : req.body.username, name : req.body.name, email : req.body.email }), req.body.password, function (err, account) {
+    User.register(new User({ username : req.body.username,role:Role.ROLES.User.id, name : req.body.name, email : req.body.email }), req.body.password, function (err, account) {
         if (err) {
             res.status(204);
+            console.log(err);
             res.json({ error : err, account : account });
         } else {
             

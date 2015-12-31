@@ -5,6 +5,8 @@
 
 var mongoose = require('mongoose');
 var passportLocalMongoose = require('passport-local-mongoose');
+var findOrCreate = require('mongoose-findorcreate');
+
 var Friend = new mongoose.Schema({
     user: {
         type: mongoose.Schema.ObjectId,
@@ -22,7 +24,7 @@ var UserSchema = new mongoose.Schema( {
         type: String, 
         unique: true, 
         index: true,
-        //match: /^[a - zA - Z0 - 9_!+-=:;?,.àç&éèáùúö]+$/
+        //match: /^[a - zA - Z0 - 9_!+-=:;?,.àç&éèáùú@ö]+$/
     },
     name: { type: String, required: true },
     email: {
@@ -41,7 +43,11 @@ var UserSchema = new mongoose.Schema( {
     location: {
         type: String,
     },
-    
+    role: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'Role', 
+        required: true
+    },
     createdOn: { type: Date, 'default': Date.now },
     lastLogin: Date
 });
@@ -60,8 +66,9 @@ UserSchema.path("password").validate(function (v) {
 }, 'Your username must contain 6 or more characters.');
 
 
-var options = ({ populateFields: "friends.user" });
+var options = ({ populateFields: ["friends.user","role"] });
 UserSchema.plugin(passportLocalMongoose, options);
+UserSchema.plugin(findOrCreate);
 
 
 module.exports = UserSchema;

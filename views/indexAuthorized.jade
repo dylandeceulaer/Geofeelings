@@ -59,6 +59,15 @@ block content
                     #collapseThree.panel-collapse.collapse(role="tabpanel" aria-labelledby="headingThree")
                         .panel-body
                             Hey dit is de body en al
+                if(user.role && user.role.name == "Administrator")
+                    .panel.panel-primary
+                        .panel-heading#headingFour(role="tab" data-toggle="collapse" data-parent="#accordion" href="#collapseFour" aria-expanded="true" aria-controls="collapseFour")
+                            h4.panel-title
+                                a(role="button")
+                                    ='Administrate Events'
+                        #collapseFour.panel-collapse.collapse(role="tabpanel" aria-labelledby="headingFour")
+                            .panel-body
+                                button.btn.btn-primary.col-xs-12#addEvent Add Event
         
     .container
         p(id="about") Welcome to #{title}
