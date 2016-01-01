@@ -12,8 +12,10 @@ append scripts
     script(src='/javascripts/effects.js')
     script(src='/javascripts/map.js')
     script(src='/javascripts/indexAuthorized.js')
+    script(src='/javascripts/bootbox.min.js')
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCs_9qVC8-LjAinVOR0zY64frEZTCxqoeU&libraries=places&callback=initMap">
     <script src="/javascripts/awesomplete.js" async></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     </script>
 
 block content
@@ -64,9 +66,9 @@ block content
                         .panel-heading#headingFour(role="tab" data-toggle="collapse" data-parent="#accordion" href="#collapseFour" aria-expanded="true" aria-controls="collapseFour")
                             h4.panel-title
                                 a(role="button")
-                                    ='Administrate Events'
+                                    ='Admin: Manage Events'
                         #collapseFour.panel-collapse.collapse(role="tabpanel" aria-labelledby="headingFour")
-                            .panel-body
+                            .panel-body#AdminEventsBody
                                 button.btn.btn-primary.col-xs-12#addEvent Add Event
         
     .container

@@ -36,15 +36,19 @@
     <Compile Include="data\connectDBService.js" />
     <Compile Include="data\models\comment.js" />
     <Compile Include="data\models\commentRepo.js" />
+    <Compile Include="data\models\event.js" />
+    <Compile Include="data\models\eventRepo.js" />
     <Compile Include="data\models\roleRepo.js" />
     <Compile Include="data\models\role.js" />
     <Compile Include="data\models\user.js" />
     <Compile Include="data\models\usersRepo.js" />
     <Compile Include="data\schemas\comment.js" />
+    <Compile Include="data\schemas\event.js" />
     <Compile Include="data\schemas\role.js" />
     <Compile Include="data\schemas\user.js" />
     <Compile Include="public\javascripts\app.js" />
     <Compile Include="public\javascripts\awesomplete.min.js" />
+    <Compile Include="public\javascripts\bootbox.min.js" />
     <Compile Include="public\javascripts\controllers\userController.js" />
     <Compile Include="public\javascripts\effects.js" />
     <Compile Include="public\javascripts\Form.js" />
@@ -59,6 +63,7 @@
     <Compile Include="public\javascripts\vendor\angular\angular-route.js" />
     <Compile Include="public\javascripts\vendor\angular\angular-sanitize.js" />
     <Compile Include="public\javascripts\vendor\angular\angular.js" />
+    <Compile Include="routes\api\event.js" />
     <Compile Include="routes\api\profile.js" />
     <Compile Include="routes\api\users.js" />
     <Compile Include="routes\index.js" />

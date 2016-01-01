@@ -10,7 +10,27 @@ html {
     margin: 5% 0 3%;
     text-align: center;
 }
-
+.panel-heading span
+{
+    margin-top: -26px;
+    font-size: 15px;
+    margin-right: -12px;
+}
+.panel-info{
+    margin-top:50px;
+}
+.panel-success{
+    margin-top:50px;
+}
+.panel-info button{
+    width:100%;
+}
+.clickable {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
 h1 {
     color: white;
     margin: 50px 0 20px;
@@ -19,6 +39,7 @@ h1 {
 .control-label {
     text-align: left !important;
 }
+
 
 .PageFiller {
     display: table;

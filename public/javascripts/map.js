@@ -3,6 +3,24 @@ var service;
 var circles = [];
 var overlay;
 var geocoder;
+var events = [];
+
+function XHRPost(url, param, cb) {
+    var oReq = new XMLHttpRequest();
+    oReq.open("POST", url, true);
+    oReq.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    oReq.addEventListener('load', cb);
+    oReq.send(param);
+}
+
+function XHRGet(url, cb) {
+    var oReq = new XMLHttpRequest();
+    oReq.addEventListener('load', cb);
+    oReq.open("get", url, true);
+    oReq.send();
+}
+    
+
 
 
 var happy = {
@@ -40,10 +58,22 @@ function initMap() {
         zoom: 8
     });
     
+    if (!google.maps.Polygon.prototype.getBounds) {
+        
+        google.maps.Polygon.prototype.getBounds = function () {
+            var bounds = new google.maps.LatLngBounds()
+            this.getPath().forEach(function (element, index) { bounds.extend(element) })
+            return bounds
+        }
+ 
+    }
+
     overlay = new google.maps.OverlayView();
     overlay.draw = function () { };
     overlay.setMap(map);
     initMapDependencies();
+    
+    placeEvents();
 
     //2cabff
     //fff200
@@ -278,37 +308,122 @@ $(function () {
         });
     });
 
-    $("#addEvent").click(function (e){
+    $("#addEvent").click(function (e) {
         var loc = map.getCenter();
+        //http://bootsnipp.com/snippets/featured/close-panel-effects
+        if ($("#newEvent").length == 0) {
+            $("#addEvent").prop('disabled', true);
+           
+            var cords = [
+                { lng: loc.lng() + 0.002, lat: (loc.lat() + 0.001) },
+                { lng: loc.lng() + 0.002, lat: loc.lat() - 0.001 },
+                { lng: loc.lng() - 0.002, lat: loc.lat() - 0.001 },
+                { lng: loc.lng() - 0.002, lat: loc.lat() + 0.001 }
+            ];
+            var rectangle = new google.maps.Polygon({
+                paths: cords,
+                editable: true,
+                strokeWeight: 0,
+                fillColor: '#999',
+                draggable: true,
+                map: map
+            });
+            rectangle.setMap(map);
+            rectangle.addListener("dragend", function (e) {
+                console.log(e);
+            })
+            $('<div id="newEvent" class="panel panel-info"><div class="panel-heading"><h3 class="panel-title">New Event</h3><span class="pull-right clickable" data-effect="slideUp"><i class="fa fa-times"></i></span></div><div class="panel-body"><form><div class="input-group"><label for="eventName" class="col-md-5">Name:</label><input type="text" id="eventName" name="eventName" class="col-md-7"/><label for="eventLocation" class="col-md-5">Location:</label><input type="text" id="eventLocation" name="eventLocation" class="col-md-7"/></div></form></div><div class="panel-footer"><button id="newEventButton" class="btn btn-primary ">Save Changes</button></div></div>').insertAfter($("#addEvent"));
+            $('#newEventButton').on('click', function () {
+                var params = new FormData();
+                params = "name=" + $("#eventName").val() + "&location=" + $("#eventLocation").val() + "&center=" + rectangle.getBounds().getCenter() ;
+                points = rectangle.getPath().j;
+                for (var val in points) {
+                    params = params + "&points[]=" + points[val];
+                }
+                XHRPost("/api/event/addEvent", params, function() {
+                    if (this.status == 200) {
+                        rectangle.setOptions({
+                            strokeWeight: 1,
+                            strokeColor: '#F00',
+                            fillColor: '#F00',
+                            editable: false,
+                            draggable: false
+                        });
+
+                    }
+                    else {
+                        
+                    }
+                });
+
+
+                //console.log(rectangle.getPath());
+            });
+            $('.clickable').on('click', function () {
+                var thiss = $(this);
+                bootbox.confirm("Are you sure you want to close this? Unsaved changes will be lost.", function (ev) {
+                    console.log($(this));
+                    if (ev) {
+                        var effect = thiss.data('effect');
+                        thiss.closest('.panel')[effect]();
+                        $("#addEvent").prop('disabled', false);
+                        $("#newEvent").remove();
+                        rectangle.setMap(null);
+                    }
+                })
+            })
+        }
+       
+    });
     
-        var cords = [
-            { lng: loc.lng() + 0.002, lat: (loc.lat() + 0.001) },
-            { lng: loc.lng() + 0.002, lat: loc.lat() -0.001 },
-            { lng: loc.lng() - 0.002, lat: loc.lat() - 0.001 },
-            { lng: loc.lng() - 0.002, lat: loc.lat() + 0.001}
-        ];
-        var rectangle = new google.maps.Polygon({
-            paths: cords,
-            editable: true,
-            strokeWeight: 0,
-            fillColor: '#999',
-            draggable: true,
-            map:map
-        });
-        rectangle.setMap(map);
-        rectangle.addListener("dragend", function (e){
-            console.log(e);
-        })
-        google.maps.event.addListener(rectangle, 'click', function () {
-            google.maps.event.addListener(rectangle.getPath(), 'set_at', function () {
-                console.log("test");
-            });
-            
-            google.maps.event.addListener(rectangle.getPath(), 'insert_at', function () {
-                console.log("test");
-            });
-            setSelection(newShape);
-        });
-        console.log(rectangle);
-    })
+    
+    
+
 });
+
+function placeEvents(){
+    XHRGet("/api/event/", function resLoginCheck() {
+        if (this.status == 200) {
+            var res = JSON.parse(this.responseText);
+            
+            for (var ii in res) {
+                var cords = [];
+                for (var i in res[ii].points) {
+                    cords.push({ lng: res[ii].points[i].Lng, lat: res[ii].points[i].Lat })
+                }
+                console.log(res[ii]);
+                var rectangle = new google.maps.Polygon({
+                    paths: cords,
+                    strokeWeight: 1,
+                    strokeColor: '#F00',
+                    fillColor: '#F00',
+                    map: map
+                });
+                rectangle.name = res[ii].name;
+                rectangle.id = res[ii]._id;
+                rectangle.center = res[ii].center;
+                rectangle.location = res[ii].location;
+                rectangle.setMap(map);
+                rectangle.addListener('click', function () {
+                    console.log(this.name);
+                    console.log(this.location);
+                });
+                events.push(rectangle);
+                var id = Math.round(Math.random() * 10000000000000000);
+                $('<div id="'+ res[ii]._id+'" class="panel panel-success"><div class="panel-heading"><h4 class="panel-title"><a data-toggle="collapse" href="#' + id + '">' + rectangle.name + ', ' + rectangle.location + '</a></h4></div><div id="' + id + '" class="panel-collapse collapse"><div class="panel-body">Panel Body</div></div></div>').insertAfter($("#AdminEventsBody").children().last()).click(function () {
+                    for (var value in events) {
+                        if(events[value].id == $(this).attr("id"))
+                            map.setCenter({ lng: events[value].center.Lng, lat: events[value].center.Lat});
+                            map.setZoom(17);
+                    }
+                });
+
+            }
+            console.log(events);
+        }
+        if (this.status == 204) {
+            console.log(err);
+        }
+    });
+
+}
