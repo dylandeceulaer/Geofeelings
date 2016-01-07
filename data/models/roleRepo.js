@@ -6,8 +6,6 @@ var findOrCreate = require('mongoose-findorcreate');
 
 RoleRepo = (function () {
     var Role = require("./role.js");
-    
-    
     var ROLES = {};
     
     ROLES.Admin = {};
@@ -39,10 +37,6 @@ RoleRepo = (function () {
             ROLES.User.id = res._id;
         }
     );
-
-
-   
-    
     return {
         ROLES : ROLES
     };

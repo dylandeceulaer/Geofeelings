@@ -91,7 +91,10 @@ h1 {
 .form-group {
     margin-bottom: 0;
 }
-
+.activity-item{
+    padding:5px 10px;
+    margin-top:10px;
+}
 .help-block {
     height: 15px;
     font-size: 12px;
@@ -208,8 +211,24 @@ h1 {
 .RegisterBtn {
     margin-top: 5px;
 }
-
-
+.popover-content > .col-xs-6{
+    padding:0 0 5px;
+    margin:0;
+}
+.popover{
+    display: inline-block;
+    white-space: nowrap;
+    min-width:200px;
+}
+.popover-content, .popover-content .body {
+    width: 100%;
+}
+.profile-item-image{
+    height:50px;
+    width:50px;
+    background-image:url('/images/NoPic.jpg');
+    background-size:cover;  
+}
 
 /*Bron van onderstaande is https://github.com/IronSummitMedia/startbootstrap-grayscale */
 
@@ -336,9 +355,12 @@ h1 {
     font-weight: bold;
 
 }
+#accordion {
+
+    padding:0;
+}
 
 #sidebar-wrapper {
-
     float: right;
     margin-right: -350px;
     right: 350px;
@@ -347,12 +369,13 @@ h1 {
     background: #efefef;
     position: absolute;
     height: 100%;
-    overflow-y: auto;
     z-index: 1000;
     -moz-transition: all 0.4s ease 0s;
     -o-transition: all 0.4s ease 0s;
     -webkit-transition: all 0.4s ease 0s;
     transition: all 0.4s ease 0s;
+    overflow-y:scroll;
+    overflow-x:visible;
 }
 
 

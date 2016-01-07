@@ -4,6 +4,9 @@ var circles = [];
 var overlay;
 var geocoder;
 var events = [];
+var votes = [];
+var infowindow;
+
 
 function XHRPost(url, param, cb) {
     var oReq = new XMLHttpRequest();
@@ -19,6 +22,111 @@ function XHRGet(url, cb) {
     oReq.open("get", url, true);
     oReq.send();
 }
+
+function addEvent(res) {
+    var cords = [];
+    for (var i in res.points) {
+        cords.push({ lng: res.points[i].Lng, lat: res.points[i].Lat })
+    }
+    var rectangle = new google.maps.Polygon({
+        paths: cords,
+        strokeWeight: 1,
+        fillOpacity: 0.65,
+        strokeColor: '#F00',
+        fillColor: '#F00',
+        map: map
+    });
+    rectangle.setMap(map);
+    rectangle.name = res.name;
+    rectangle.id = res._id;
+    rectangle.center = res.center;
+    rectangle.location = res.location;
+    rectangle.votes = res.votes;
+    
+    rectangle.voteBalance = 0;
+    if (rectangle.votes) {
+        for (var i in rectangle.votes) {
+            if (rectangle.votes[i].mood == "happy")
+                rectangle.voteBalance++;
+            if (rectangle.votes[i].mood == "unhappy")
+                rectangle.voteBalance--;
+        }
+    }
+    
+    if (rectangle.voteBalance > 0) {
+        rectangle.setOptions({
+            fillColor: '#fff200',
+            strokeColor: '#fff200'
+        });
+    }
+    if (rectangle.voteBalance < 0) {
+        rectangle.setOptions({
+            fillColor: '#2cabff',
+            strokeColor: '#2cabff'
+        });
+    }
+    
+    rectangle.addListener('click', function () {
+        console.log(this.name);
+        document.getElementById("link" + this.id).click();
+    });
+    events.push(rectangle);
+    var id = Math.round(Math.random() * 10000000000000000);
+    var object = $('<div class="panel panel-success"><div class="panel-heading"><h4 class="panel-title"><a id="link' + res._id + '" data-toggle="collapse" href="#' + id + '">' + rectangle.name + ', ' + rectangle.location + '</a></h4></div><div id="' + id + '" class="panel-collapse collapse"><div class="panel-body" id="' + res._id + '"><input class="form-control input-name" placeholder="name" value="' + rectangle.name + '"/><input class="form-control input-location" placeholder="location" value="' + rectangle.location + '"/><button class="event-button locate-event btn btn-default">Locate</button><button class="event-button delete-event btn btn-default">Delete</button></div></div></div>').insertAfter($("#AdminEventsBody").children().last());
+    
+    var elements = object.children(".panel-collapse").children().first();
+    elements.children(".input-location").change(function (e) {
+        var params = "id=" + $(this).parent().attr("id") + "&location=" + $(this).val();
+        var obj = this;
+        XHRPost("/api/event/updateEvent", params, function () {
+            if (this.status == 200) {
+                updateTitle(obj)
+            }
+        });
+    });
+    elements.children(".delete-event").click(function (e) {
+        var thiss = this;
+        bootbox.confirm("Are you sure you want to delete this event?", function (ev) {
+            if (ev) {
+                var id = $(thiss).parent().attr("id")
+                var params = "id=" + id;
+                var obj = thiss;
+                XHRPost("/api/event/deleteEvent", params, function () {
+                    if (this.status == 200) {
+                        for (var value in events) {
+                            if (events[value].id == id) {
+                                events[value].setMap(null);
+                                delete events[value]
+                            }
+                        }
+                        $(obj).parent().parent().parent().remove();
+                    }
+                });
+            }
+        });
+    });
+    var eff;
+    elements.children(".locate-event").click(function (e) {
+        map.setCenter({ lat: rectangle.center.Lat, lng: rectangle.center.Lng });
+        map.setZoom(16);
+    });
+    console.log(eff);
+    elements.children(".input-name").change(function (e) {
+        var params = "id=" + $(this).parent().attr("id") + "&name=" + $(this).val();
+        var obj = this;
+        XHRPost("/api/event/updateEvent", params, function () {
+            if (this.status == 200) {
+                updateTitle(obj)
+            }
+        });
+                        
+    });
+    function updateTitle(obj) {
+        $(obj).parent().parent().parent().children(".panel-heading").children("h4").children("a").text($(obj).parent().children(".input-name").val() + ", " + $(obj).parent().children(".input-location").val());
+    }
+
+}
+
     
 function initMap() {
     console.log("initializing map");
@@ -55,107 +163,8 @@ function initMap() {
                     })
                     
                     var res = JSON.parse(this.responseText);
-                    
                     for (var ii in res) {
-                        var cords = [];
-                        for (var i in res[ii].points) {
-                                cords.push({ lng: res[ii].points[i].Lng, lat: res[ii].points[i].Lat })
-                        }
-                        var rectangle = new google.maps.Polygon({
-                            paths: cords,
-                            strokeWeight: 1,
-                            strokeColor: '#F00',
-                            fillColor: '#F00',
-                            map: map
-                        });
-                        rectangle.setMap(map);
-                        rectangle.name = res[ii].name;
-                        rectangle.id = res[ii]._id;
-                        rectangle.center = res[ii].center;
-                        rectangle.location = res[ii].location;
-                        rectangle.votes = res[ii].votes;
-                        
-                        rectangle.voteBalance = 0;
-                        if (rectangle.votes) {
-                            for (var i in rectangle.votes) {
-                                if (rectangle.votes[i].mood == "happy")
-                                    rectangle.voteBalance++;
-                                if (rectangle.votes[i].mood == "unhappy")
-                                    rectangle.voteBalance--;
-                            }
-                        }
-                        
-                        if (rectangle.voteBalance > 0) {
-                            rectangle.setOptions({
-                                fillColor: '#fff200',
-                                strokeColor: '#fff200'
-                            });
-                        }
-                        if (rectangle.voteBalance < 0) {
-                            rectangle.setOptions({
-                                fillColor: '#2cabff',
-                                strokeColor: '#2cabff'
-                            });
-                        }
-
-                        rectangle.addListener('click', function () {
-                            console.log(this.name);
-                            console.log(this.location);
-                            console.log(this.voteBalance);
-                        });
-                        events.push(rectangle);
-                        var id = Math.round(Math.random() * 10000000000000000);
-                        $('<div class="panel panel-success"><div class="panel-heading"><h4 class="panel-title"><a data-toggle="collapse" href="#' + id + '">' + rectangle.name + ', ' + rectangle.location + '</a></h4></div><div id="' + id + '" class="panel-collapse collapse"><div class="panel-body" id="' + res[ii]._id + '"><input class="form-control input-name" placeholder="name" value="'+rectangle.name+'"/><input class="form-control input-location" placeholder="location" value="'+ rectangle.location+'"/><button class="event-button locate-event btn btn-default">Locate</button><button class="event-button delete-event btn btn-default">Delete</button></div></div></div>').insertAfter($("#AdminEventsBody").children().last())
-                        
-                        //.click(function () {
-                        //    for (var value in events) {
-                        //        if (events[value].id == $(this).attr("id"))
-                        //            map.setCenter({ lng: events[value].center.Lng, lat: events[value].center.Lat });
-                        //        map.setZoom(17);
-                        //    }
-                        //});
-                    }
-                    $(".input-location").change(function (e) {
-                        var params = "id=" + $(this).parent().attr("id") + "&location=" + $(this).val();
-                        var obj = this;
-                        XHRPost("/api/event/updateEvent", params, function () {
-                            if (this.status == 200) {
-                                updateTitle(obj)
-                            }
-                        });
-                    }); $(".delete-event").click(function (e) {
-                        var thiss = this;
-                        bootbox.confirm("Are you sure you want to delete this event?", function (ev) {
-                            if (ev) {
-                                var id = $(thiss).parent().attr("id")
-                                var params = "id=" + id;
-                                var obj = thiss;
-                                XHRPost("/api/event/deleteEvent", params, function () {
-                                    if (this.status == 200) {
-                                        for (var value in events) {
-                                            if (events[value].id == id) {
-                                                events[value].setMap(null);
-                                                delete events[value]
-                                            }
-                                        }
-                                        $(obj).parent().parent().parent().remove();
-                                    }
-                                });
-                            }
-                        });
-                    });
-                    $(".input-name").change(function (e) {
-                        var params = "id=" + $(this).parent().attr("id") + "&name=" + $(this).val();
-                        var obj = this;
-                        XHRPost("/api/event/updateEvent", params, function () {
-                            if (this.status == 200) {
-                                updateTitle(obj)
-                            }
-                        });
-                        
-                    });
-                    function updateTitle(obj){
-                        $(obj).parent().parent().parent().children(".panel-heading").children("h4").children("a").text($(obj).parent().children(".input-name").val()+", "+$(obj).parent().children(".input-location").val());
+                        addEvent(res[ii]);
                     }
                 } else if (this.status == 204) {
                     while (events[0]) {
@@ -178,7 +187,7 @@ function initMap() {
                     }
 
                     var res = JSON.parse(this.responseText);
-                    
+                    votes = [];
                     for (var ii in res) {
                         var moodCircle = new google.maps.Circle( {
                             strokeWeight: 0,
@@ -192,12 +201,28 @@ function initMap() {
                         moodCircle.city = res[ii].city;
                         
                         moodCircle.addListener('click', function (e) {
-                            map.setCenter(moodCircle.center);
+                            map.setCenter(this.center);
                             map.setZoom(18);
-                            console.log(moodCircle);
+                            console.log(this);
+                            if (infowindow) {
+                                infowindow.close();
+                            }
+                            var votes = "";
+                            for (var vote in this.votes) {
+                                votes = votes + "<div class='panel'><div class='panel-body'>" + this.votes[vote].voter.username + "</div></div>";
+                            }
+                            var contentString = '<div class="panel-heading">' + this.name + '</div><div class="info-content">'+votes+'</div>';
+                            
+                            infowindow = new google.maps.InfoWindow({
+                                content: contentString, 
+                                position: this.center,
+                                map: map
+                            });
+                            
+                            //HIER AFWERKEN
+                            
+
                         });
-
-
                         moodCircle.voteBalance = 0;
                         if (moodCircle.votes) {
                             for (var i in moodCircle.votes) {
@@ -237,13 +262,39 @@ function initMap() {
                             moodCircle.setRadius(30 + (20 * multiplier) - 20)
                         if (multiplier == 0)
                             moodCircle.setRadius(30 + (20 * multiplier))
-
                         
-                        
+                        if (moodCircle.votes)
+                            for (var item in moodCircle.votes) {
+                                moodCircle.votes[item].name = moodCircle.name;
+                                moodCircle.votes[item].city = moodCircle.city;
+                                votes.push(moodCircle.votes[item]);
+                            }
 
                         circles.push(moodCircle);
-
                     }
+                    votes.sort(function (a, b) {
+                        return (Date.parse(b.Date) - Date.parse(a.Date));
+                    });
+                    votes.splice(10, votes.length - 10)
+                    $('#collapseOne > .panel-body >.panel').each(function () {
+                        $(this).remove();
+                    })
+                    for (var ii in votes) {
+                        var loc = "";
+                        var src = "";
+                        if (votes[ii].voter.image)
+                            src = "style = 'background-image: url(/userimages/" + votes[ii].voter.image + ")'";
+                        if (votes[ii].voter.location)
+                            loc = votes[ii].voter.location;
+                        var img = "<div class='img-circle profile-item-image' " + src + " ' ></div>";
+                        var content="<div class='col-xs-6'>"+img+"</div><div class='col-xs-6'>"+ votes[ii].voter.name+"<br>"+ loc+"</div>"
+                        var obj = $('<div class="panel"><div class="panel-body activity-item"><a class="hoverUser" href="/profile/' + votes[ii].voter.username + '"  data-html="true" data-content="'+ content+'"  rel="popover" data-original-title="' + votes[ii].voter.username + '" data-trigger="hover" data-userId="' + votes[ii].voter._id + '"> ' + votes[ii].voter.username + '</a> was <span class="' + votes[ii].mood + '">' + votes[ii].mood + '</span> around <a href="#">' + votes[ii].name  + '</a>.<br><strong>' + FriendlyDate(votes[ii].Date) + ' ago</strong></div></div>');
+                        $("#collapseOne > .panel-body").append(obj);
+                        obj.children(".panel-body").children(".hoverUser").popover({ trigger: "hover" });
+
+                       
+                    }
+
                 } else if (this.status == 204) {
                     while (events[0]) {
                         events.pop().setMap(null);
@@ -535,7 +586,7 @@ function initMapDependencies() {
                                 
                         }
                         else {
-                                    console.log("failed to add MoodCircle");
+                            console.log("failed to add MoodCircle");
                         }
                     });
                 }
@@ -569,7 +620,7 @@ function setZoomAnimation(mappy, zoomlevel){
 }
 
 $(function () {
-
+    
 
     $("#menu-toggle").click(function (e) {
         $('#wrapper').toggleClass("activebar");
@@ -629,20 +680,12 @@ $(function () {
                 var obj = this.target;
                 XHRPost("/api/event/addEvent", params, function() {
                     if (this.status == 200) {
-                        rectangle.setOptions({
-                            strokeWeight: 1,
-                            strokeColor: '#F00',
-                            fillColor: '#F00',
-                            editable: false,
-                            draggable: false
-                        });
-                        //FOUT BIJ DE JSON HIER
                         var res = JSON.parse(this.responseText);
-                        rectangle.id = res._id;
+                        rectangle.setMap(null);
+                        addEvent(res);
                         $("#newEvent").remove();
                         $("#addEvent").prop('disabled', false);
-                        $('<div class="panel panel-success"><div class="panel-heading"><h4 class="panel-title"><a data-toggle="collapse" href="#' + rectangle.id + '">' + $("#eventName").val() + ', ' + $("#eventLocation").val() + '</a></h4></div><div id="' + rectangle.id + '" class="panel-collapse collapse"><div class="panel-body" id="' + rectangle._id + '"><input class="form-control input-name" placeholder="name" value="' + $("#eventName").val() + '"/><input class="form-control input-location" placeholder="location" value="' + $("#eventLocation").val() + '"/><button class="event-button locate-event btn btn-default">Locate</button><button class="event-button delete-event btn btn-default">Delete</button></div></div></div>').insertAfter($("#AdminEventsBody").children().last())
-
+                        
                     }
                     else {
                         
@@ -665,58 +708,19 @@ $(function () {
                 })
             })
         }
-       
     });
-    
-    
-    
-
 });
 
-function placeEvents(){
-    XHRGet("/api/event/", function resLoginCheck() {
-        if (this.status == 200) {
-            var res = JSON.parse(this.responseText);
+function FriendlyDate(date1) {
+    var seconds = Math.round((Date.now() - Date.parse(date1))/1000);
+    var minutes = Math.round(seconds / 60);
+    var hours = Math.round(minutes / 60);
 
-            
-            for (var ii in res) {
-                var cords = [];
-                for (var i in res[ii].points) {
-                    cords.push({ lng: res[ii].points[i].Lng, lat: res[ii].points[i].Lat })
-                }
-                console.log(res[ii]);
-                var rectangle = new google.maps.Polygon({
-                    paths: cords,
-                    strokeWeight: 1,
-                    strokeColor: '#F00',
-                    fillColor: '#F00',
-                    map: map
-                });
-                rectangle.name = res[ii].name;
-                rectangle.id = res[ii]._id;
-                rectangle.center = res[ii].center;
-                rectangle.location = res[ii].location;
-                rectangle.setMap(map);
-                rectangle.addListener('click', function () {
-                    console.log(this.name);
-                    console.log(this.location);
-                });
-                events.push(rectangle);
-                var id = Math.round(Math.random() * 10000000000000000);
-                $('<div id="'+ res[ii]._id+'" class="panel panel-success"><div class="panel-heading"><h4 class="panel-title"><a data-toggle="collapse" href="#' + id + '">' + rectangle.name + ', ' + rectangle.location + '</a></h4></div><div id="' + id + '" class="panel-collapse collapse"><div class="panel-body">Panel Body</div></div></div>').insertAfter($("#AdminEventsBody").children().last()).click(function () {
-                    for (var value in events) {
-                        if(events[value].id == $(this).attr("id"))
-                            map.setCenter({ lng: events[value].center.Lng, lat: events[value].center.Lat});
-                            map.setZoom(17);
-                    }
-                });
-
-            }
-            console.log(events);
-        }
-        if (this.status == 204) {
-            console.log(err);
-        }
-    });
+    if (hours >= 1)
+        return hours+" hours";
+    if (minutes >= 1)
+        return minutes + " minutes";
+    else
+        return seconds + " seconds";
 
 }

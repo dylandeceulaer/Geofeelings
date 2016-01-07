@@ -7,6 +7,7 @@ var MoodCircleRepo = require("../../data/models/moodCircleRepo");
 var MoodCircle = require("../../data/models/moodCircle");
 
 
+
 router.post('/getEventsInScope', function (req, res) {
     EventRepo.getEventsInScope(req.body.latMin, req.body.latMax, req.body.lngMin, req.body.lngMax, function (err , result) {
         if (err) {
@@ -52,7 +53,7 @@ router.post('/getMoodCirclesInScope', function (req, res) {
             res.status(204);
             res.send('Nothing Found');
         }
-    });
+    },true);
 });
 
 router.post('/updateEvent', function (req, res) {
@@ -184,7 +185,7 @@ router.post('/addEvent', function (req, res) {
                 res.send("something went wrong");
             } else {
                 res.status(200);
-                res.send("Comment added");
+                res.json(result);
             }
         });
     }
