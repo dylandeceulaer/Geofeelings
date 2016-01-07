@@ -1,11 +1,11 @@
 ﻿
 var mongoose = require("mongoose");
 
-EventRepo = (function () {
-    var Event = require("./event.js");
+MoodCircleRepo = (function () {
+    var MoodCircle = require("./moodCircle.js");
     
-    var getEvents = function (next) {
-        Event.find({}).exec(function (err, res) {
+    var getMoodCircles = function (next) {
+        MoodCircle.find({ }).exec(function (err, res) {
             if (err) {
                 console.log(err);
                 next(err, null);
@@ -15,22 +15,10 @@ EventRepo = (function () {
             else
                 next(null, res);
         });
-    }, 
-        updateEvent = function (id, updatevalues, next) {
-            Event.update({ _id: id }, updatevalues, function (error, result) {
-                if (error) {
-                    console.error(error);
-                    return next(error, null);
-                }
-                else {
-                    if (next)
-                        return next(null, "ok");
-                }
-            });
-        },
-        getEventsInScope = function (latMin, latMax, lngMin, lngMax, next, isPopulated) {
+    },  
+        getMoodCirclesInScope = function (latMin, latMax, lngMin, lngMax, next, isPopulated) {
             if (isPopulated) {
-                Event.where('center.Lat').gte(latMin).lte(latMax).where('center.Lng').gte(lngMin).lte(lngMax).populate('votes.voter').exec(function (err, res) {
+                MoodCircle.where('center.Lat').gte(latMin).lte(latMax).where('center.Lng').gte(lngMin).lte(lngMax).populate('votes.voter').exec(function (err, res) {
                     if (err) {
                         console.log(err);
                         next(err, null);
@@ -40,8 +28,8 @@ EventRepo = (function () {
                     else
                         next(null, res);
                 });
-            } else {
-                Event.where('center.Lat').gte(latMin).lte(latMax).where('center.Lng').gte(lngMin).lte(lngMax).exec(function (err, res) {
+            }else{
+                MoodCircle.where('center.Lat').gte(latMin).lte(latMax).where('center.Lng').gte(lngMin).lte(lngMax).exec(function (err, res) {
                     if (err) {
                         console.log(err);
                         next(err, null);
@@ -52,15 +40,14 @@ EventRepo = (function () {
                         next(null, res);
                 });
             }
-        },
-        updateVotes = function (id, vote, voterId, next) {
-            
-            Event.findOne({ _id: id }).exec(function (err, res) {
+    },
+        updateVotes = function (id,vote,voterId, next) {
+            MoodCircle.findOne({ _id: id }).exec(function (err, res) {
                 if (res.votes.length == 0)
                     res.votes = [];
                 if (vote.toLowerCase() == "happy") {
-                    res.votes.push({ voter: voterId, mood: "happy" });
-                } else {
+                    res.votes.push({ voter: voterId, mood:"happy" });
+                }else {
                     res.votes.push({ voter: voterId, mood: "unhappy" });
                 }
                 res.save(function (err, res) {
@@ -75,12 +62,12 @@ EventRepo = (function () {
         },
 
         getById = function (id, next) {
-            Event.find({ _id: id }).populate('Votes.').exec(function (err, res) {
+            MoodCircle.find({ _id: id }).populate('Votes.').exec(function (err, res) {
                 next(err, res);
             });
         },
-        deleteEvent = function (eventId, next) {
-            Event.remove({ _id: eventId }, function (err) {
+        deleteMoodCircle = function (moodCircleId, next) {
+            MoodCircle.remove({ _id: moodCircleId }, function (err) {
                 if (err) {
                     next(err);
                 } else {
@@ -88,16 +75,13 @@ EventRepo = (function () {
                 }
             });
         };
-        
     
     return {
-        updateEvent: updateEvent,
-        getEvents : getEvents ,
+        getMoodCircles : getMoodCircles ,
         updateVotes: updateVotes,
         getById: getById,
-        deleteEvent: deleteEvent,
-        getEventsInScope: getEventsInScope
+        getMoodCirclesInScope: getMoodCirclesInScope
     };
 })();
 
-module.exports = EventRepo;
+module.exports = MoodCircleRepo;

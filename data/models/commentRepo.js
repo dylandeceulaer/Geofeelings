@@ -1,5 +1,4 @@
-﻿
-var mongoose = require("mongoose");
+﻿var mongoose = require("mongoose");
 
 CommentRepo = (function () {
     var Comment = require("./comment.js");

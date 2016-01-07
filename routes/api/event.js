@@ -3,38 +3,169 @@ var express = require('express');
 var router = express.Router();
 var EventRepo = require("../../data/models/eventRepo");
 var Event = require("../../data/models/event");
+var MoodCircleRepo = require("../../data/models/moodCircleRepo");
+var MoodCircle = require("../../data/models/moodCircle");
 
 
-router.get('/', function (req, res) {
-    EventRepo.getEvents(function (err , result) {
+router.post('/getEventsInScope', function (req, res) {
+    EventRepo.getEventsInScope(req.body.latMin, req.body.latMax, req.body.lngMin, req.body.lngMax, function (err , result) {
         if (err) {
-            res.status(500);
-            res.send('Internal server Error');
-            console.log(err);
+            if (err == "No records found") {
+                res.status(204);
+                res.send('Nothing Found');
+            } else {
+                res.status(500);
+                res.send('Internal server Error');
+                console.log(err);
+            }
         }
         else if (result && result.length > 0) {
             res.status(200);
-            console.log(result);
             res.json(result);
         }
         else {
+            
             res.status(204);
             res.send('Nothing Found');
-                
         }
     });
+});
+
+router.post('/getMoodCirclesInScope', function (req, res) {
+    MoodCircleRepo.getMoodCirclesInScope(req.body.latMin, req.body.latMax, req.body.lngMin, req.body.lngMax, function (err , result) {
+        if (err) {
+            if (err == "No records found") {
+                res.status(204);
+                res.send('Nothing Found');
+            } else {
+                res.status(500);
+                res.send('Internal server Error');
+                console.log(err);
+            }
+        }
+        else if (result && result.length > 0) {
+            res.status(200);
+            res.json(result);
+        }
+        else {
+            
+            res.status(204);
+            res.send('Nothing Found');
+        }
+    });
+});
+
+router.post('/updateEvent', function (req, res) {
+    if (!req.user.role.name || req.user.role.name == "User") {
+        res.status(401);
+        res.send("You need to be administrator.");
+    } else {
+        var name = req.body.name;
+        var location = req.body.location;
+        var vals = {};
+        if (name)
+            vals.name = name;
+        if (location)
+            vals.location = location;
+        
+        EventRepo.updateEvent(req.body.id, vals, function (err , result) {
+            if (err) {
+                if (err == "No records found") {
+                    res.status(204);
+                    res.send('Nothing Found');
+                } else {
+                    res.status(500);
+                    res.send('Internal server Error');
+                    console.log(err);
+                }
+            }
+            else if (result && result.length > 0) {
+                res.status(200);
+                res.json(result);
+            }
+            else {
+                res.status(204);
+                res.send('Nothing Found');
+            }
+        });
+    }
+});
+
+router.post('/deleteEvent', function (req, res) {
+    if (!req.user.role.name || req.user.role.name == "User") {
+        res.status(401);
+        res.send("You need to be administrator.");
+    } else {
+        EventRepo.deleteEvent(req.body.id, function (err , result) {
+            if (err) {
+                if (err == "No records found") {
+                    res.status(204);
+                    res.send('Nothing Found');
+                } else {
+                    res.status(500);
+                    res.send('Internal server Error');
+                    console.log(err);
+                }
+            }
+            else {
+                res.status(200);
+                res.send('ok');
+            }
+        });
+    }
 });
 
 function parseLatLng(val){
     val = val.replace("(", "");
     val = val.replace(")", "");
     return val.split(",");
-}
+} 
 
-router.post('/addEvent', function (req, res) {
+router.post('/addVoteEvent', function (req, res) {
+    if(req.user.role.name == "User") {
+        res.status(401);
+        res.send("You need to be administrator.");
+    }else {
+        EventRepo.updateVotes(req.body.id, req.body.vote, req.user._id, function (err, result) {
+            if (err) {
+                res.status(500);
+                res.send("Something went wrong.");
+                console.error(err);
+            }
+            else {
+                res.status(200);
+                res.send("Successfull");                  
+            }
+        });
+    }
+    
+});
+
+router.post('/addVoteMoodCircle', function (req, res) {
     if (!req.user) {
         res.status(401);
-        res.send("you need to be logged in to post a comment.");
+        res.send("you need to be logged in.");
+    } else {
+        MoodCircleRepo.updateVotes(req.body.id, req.body.vote, req.user._id, function (err, result) {
+            if (err) {
+                res.status(500);
+                res.send("Something went wrong.");
+                console.error(err);
+            }
+            else {
+                res.status(200);
+                res.send("Successfull");
+            }
+        });
+    }
+    
+});
+
+
+router.post('/addEvent', function (req, res) {
+    if (!req.user.role.name || req.user.role.name == "User") {
+        res.status(401);
+        res.send("You need to be administrator.");
     } else {
         var arr = req.body['points[]'];
         var resArr = [];
@@ -54,6 +185,27 @@ router.post('/addEvent', function (req, res) {
             } else {
                 res.status(200);
                 res.send("Comment added");
+            }
+        });
+    }
+});
+router.post('/addMoodCircle', function (req, res) {
+    if (!req.user) {
+        res.status(401);
+        res.send("you need to be logged in to post a comment.");
+    } else {
+        
+        var result = parseLatLng(req.body.center);
+        var center = { Lat: result[0], Lng: result[1] };
+        
+        MoodCircle.create({ name: req.body.name, city: req.body.city, center: center, radious: req.body.radius }, function (err, result) {
+            if (err) {
+                console.log(err);
+                res.status(500);
+                res.send("something went wrong");
+            } else {
+                res.status(200);
+                res.json(result);
             }
         });
     }
