@@ -7,25 +7,68 @@
 var emitter = new (require('events').EventEmitter)();
 var usersRepo = require("./data/models/usersRepo.js");
 var User = require("./data/models/user.js");
-var router = require("./routes/users.js");
+var router = require("./routes/api/event.js");
 //var app = require("./app.js");
 
 module.exports = function (io , mongoose) {
-  
-    io.sockets.on('connection', function (socket) {
-        console.log("sockets connected")
+    var ActiveSockets = [];
+    
+    router.emitter.on("friendMessage", function (user, data) {
+        for (var i = 0; i < ActiveSockets.length; i++) {
+            if (ActiveSockets[i].UserId == user) {
+                console.log("deze ist", user);
+                io.sockets.connected[ActiveSockets[i].id].emit("FriendUpdate", data)
+            }
+        }
+    });
+    router.emitter.on("Update", function (data) {
+        var latMin = data.center.Lat - 0.05;
+        var latMax = data.center.Lat + 0.05;
+        var lngMin = data.center.Lng - 0.05;
+        var lngMax = data.center.Lng + 0.05;
+        
+        for (var i = 0; i < ActiveSockets.length; i++) {
+            if (ActiveSockets[i].location.lat > latMin && ActiveSockets[i].location.lat < latMax && ActiveSockets[i].location.lng > lngMin && ActiveSockets[i].location.lng < lngMax) {
+                io.sockets.connected[ActiveSockets[i].id].emit("Update", data)
+            }
+        }
+    });
 
-        //socket.emit('login'); //indien login procedure nodig       
+    function updateOrAdd(id,userid, loc, next){
+        var isFound = false;
+        for (var i = 0; i < ActiveSockets.length; i++) {
+            if (ActiveSockets[i].id == id) {
+                isFound = true;
+                ActiveSockets[i].location = loc;
+                return next();
+            }
+        }
+        if (!isFound) {
+            ActiveSockets.push({ id: id, location: loc,UserId: userid});
+            return next();
+        }
+    }
 
-        //---------- socket handlers ------------        
-        socket.on('clientmessage', function (data) {                                       
+    io.sockets.on('connection', function (socket) {   
+
+        
+        socket.on('updateLocation', function (id,loc) {
+            updateOrAdd(socket.id,id,loc, function () { })
         });
         
-        router.emitter.on('routermessage', function (user) {
-            console.log("Nieuwe gebruiker" , user.username , " aangemaakt");
-            socket.emit("message", "Welkom " + user.username + " als nieuwe gebruiker.");
+        router.emitter.on("friendMessage", function (user, data) {
+            socket.emit(user, data);
         });
         
+        
+        socket.on("disconnect", function (){
+            for (var i = 0; i < ActiveSockets.length; i++) {
+                if (ActiveSockets[i].id == socket.id) {
+                    ActiveSockets.splice(i, 1);
+                }
+            }
+        })
+
         //app.on("appMessage" , function (user) {
         //    console.log("data " , user);
         //    socket.emit("message", "Welkom " + user.username +  " als nieuwe gebruiker.");

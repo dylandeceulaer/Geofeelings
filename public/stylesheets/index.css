@@ -17,6 +17,12 @@ html {
     font-size: 15px;
     margin-right: -12px;
 }
+.happy{
+    color:#f5b800;
+}
+.unhappy{
+    color:blue;
+}
 .event-button{
     margin-top:15px;
     width:100%;
@@ -218,7 +224,7 @@ h1 {
 .popover{
     display: inline-block;
     white-space: nowrap;
-    min-width:200px;
+    min-width:230px;
 }
 .popover-content, .popover-content .body {
     width: 100%;

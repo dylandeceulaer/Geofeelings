@@ -1,4 +1,8 @@
-﻿var map;
+﻿//TODO: ZO EEN CHATTERKE ZO
+//TODO: EVENTS
+
+
+var map;
 var service;
 var circles = [];
 var overlay;
@@ -6,6 +10,8 @@ var geocoder;
 var events = [];
 var votes = [];
 var infowindow;
+var OutOfMapLocations = [];
+var socketAdditions = [];
 
 
 function XHRPost(url, param, cb) {
@@ -39,7 +45,7 @@ function addEvent(res) {
     rectangle.setMap(map);
     rectangle.name = res.name;
     rectangle.id = res._id;
-    rectangle.center = res.center;
+    rectangle.center = { lat: res.center.Lat, lng: res.center.Lng };
     rectangle.location = res.location;
     rectangle.votes = res.votes;
     
@@ -67,7 +73,6 @@ function addEvent(res) {
     }
     
     rectangle.addListener('click', function () {
-        console.log(this.name);
         document.getElementById("link" + this.id).click();
     });
     events.push(rectangle);
@@ -105,12 +110,10 @@ function addEvent(res) {
             }
         });
     });
-    var eff;
     elements.children(".locate-event").click(function (e) {
-        map.setCenter({ lat: rectangle.center.Lat, lng: rectangle.center.Lng });
+        map.setCenter(rectangle.center);
         map.setZoom(16);
     });
-    console.log(eff);
     elements.children(".input-name").change(function (e) {
         var params = "id=" + $(this).parent().attr("id") + "&name=" + $(this).val();
         var obj = this;
@@ -124,11 +127,105 @@ function addEvent(res) {
     function updateTitle(obj) {
         $(obj).parent().parent().parent().children(".panel-heading").children("h4").children("a").text($(obj).parent().children(".input-name").val() + ", " + $(obj).parent().children(".input-location").val());
     }
+    
+    if (rectangle.votes)
+        for (var item in rectangle.votes) {
+            rectangle.votes[item].type = "event";
+            rectangle.votes[item].name = rectangle.name;
+            rectangle.votes[item].id = rectangle.id;
+            rectangle.votes[item].city = rectangle.location;
+            votes.push(rectangle.votes[item]);
+        }
 
 }
+function addMoodCircle(res) {
+    var moodCircle = new google.maps.Circle({
+        strokeWeight: 0,
+        fillOpacity: 0.65,
+        map: map,
+        center: { lat: res.center.Lat, lng: res.center.Lng }
+    });
+    moodCircle.id = res._id;
+    moodCircle.votes = res.votes;
+    moodCircle.name = res.name;
+    moodCircle.city = res.city;
+    
+    moodCircle.addListener('click', function (e) {
+        map.setCenter(this.center);
+        map.setZoom(18);
+        if (infowindow) {
+            infowindow.close();
+        }
+        var votes = "";
+        for (var vote in this.votes) {
+            votes = votes + "<div class='panel'><div class='panel-body'>" + this.votes[vote].voter.username + "</div></div>";
+        }
+        var contentString = '<div class="panel-heading">' + this.name + '</div><div class="info-content">' + votes + '</div>';
+        
+        infowindow = new google.maps.InfoWindow({
+            content: contentString,
+            position: this.center,
+            map: map
+        });
 
+
+    });
+    moodCircle.voteBalance = 0;
+    if (moodCircle.votes) {
+        for (var i in moodCircle.votes) {
+            if (moodCircle.votes[i].mood == "happy")
+                moodCircle.voteBalance++;
+            if (moodCircle.votes[i].mood == "unhappy")
+                moodCircle.voteBalance--;
+        }
+    }
+    if (moodCircle.voteBalance > 0) {
+        moodCircle.setOptions({
+            fillColor: '#fff200',
+        });
+    }
+    
+    if (moodCircle.voteBalance < 0) {
+        moodCircle.setOptions({
+            fillColor: '#2cabff',
+        });
+    }
+    if (moodCircle.voteBalance == 0) {
+        if (moodCircle.votes[moodCircle.votes.length - 1].mood == "happy") {
+            moodCircle.setOptions({
+                fillColor: '#fff200'
+            });
+        } else {
+            moodCircle.setOptions({
+                fillColor: '#2cabff'
+            });
+        }
+    }
+    
+    var multiplier = moodCircle.voteBalance;
+    if (moodCircle.voteBalance < 0)
+        multiplier = multiplier * (-1);
+    if (multiplier != 0)
+        moodCircle.setRadius(30 + (20 * multiplier) - 20)
+    if (multiplier == 0)
+        moodCircle.setRadius(30 + (20 * multiplier))
+    
+    if (moodCircle.votes)
+        for (var item in moodCircle.votes) {
+            moodCircle.votes[item].type = "moodCircle";
+            moodCircle.votes[item].name = moodCircle.name;
+            moodCircle.votes[item].id = moodCircle.id;
+            moodCircle.votes[item].city = moodCircle.city;
+            votes.push(moodCircle.votes[item]);
+        }
+    
+    circles.push(moodCircle);
+
+}
     
 function initMap() {
+    
+
     console.log("initializing map");
     
     // Create a map object 
@@ -141,16 +238,20 @@ function initMap() {
         zoom: 8
     });
     
-    map.addListener("idle", function (){
+    map.addListener("idle", function (e){
+        votes = [];
+        updateLocation(user._id, map.getCenter());
+
         var modifier = 0;
         if (map.getZoom() > 11.5) {
             if (map.getZoom() >= 13)
-                modifier = 0.025;
+                modifier = 0.05;
             if (map.getZoom() >= 14)
                 modifier = 0.05;
             if (map.getZoom() > 14.5)
                 modifier = 0.075;
             var params = "latMin=" + (this.getBounds().getSouthWest().lat() - modifier) + "&latMax=" + (this.getBounds().getNorthEast().lat() + modifier) + "&lngMin=" + (this.getBounds().getSouthWest().lng() - modifier) + "&lngMax=" + (this.getBounds().getNorthEast().lng() + modifier);
+            
             XHRPost("/api/event/getEventsInScope", params, function () {
                 if (this.status == 200) {
                     
@@ -176,137 +277,74 @@ function initMap() {
                 } else {
 
                 }
-                
-            });
-            
-            XHRPost("/api/event/getMoodCirclesInScope", params, function () {
-                if (this.status == 200) {
+                XHRPost("/api/event/getMoodCirclesInScope", params, function () {
                     
-                    while (circles[0]) {
-                        circles.pop().setMap(null);
+                    if (this.status == 200) {
+                        
+                        while (circles[0]) {
+                            circles.pop().setMap(null);
+                        }
+                        
+                        var res = JSON.parse(this.responseText);
+                        for (var ii in res) {
+                            addMoodCircle(res[ii])
+                        }
+                    
+
+                    } else if (this.status == 204) {
+                        while (circles[0]) {
+                            circles.pop().setMap(null);
+                        }
+                    } else {
+
                     }
-
-                    var res = JSON.parse(this.responseText);
-                    votes = [];
-                    for (var ii in res) {
-                        var moodCircle = new google.maps.Circle( {
-                            strokeWeight: 0,
-                            fillOpacity: 0.65,
-                            map: map,
-                            center: {lat: res[ii].center.Lat, lng: res[ii].center.Lng}
-                        });
-                        moodCircle.id = res[ii]._id;
-                        moodCircle.votes = res[ii].votes;
-                        moodCircle.name = res[ii].name;
-                        moodCircle.city = res[ii].city;
-                        
-                        moodCircle.addListener('click', function (e) {
-                            map.setCenter(this.center);
-                            map.setZoom(18);
-                            console.log(this);
-                            if (infowindow) {
-                                infowindow.close();
-                            }
-                            var votes = "";
-                            for (var vote in this.votes) {
-                                votes = votes + "<div class='panel'><div class='panel-body'>" + this.votes[vote].voter.username + "</div></div>";
-                            }
-                            var contentString = '<div class="panel-heading">' + this.name + '</div><div class="info-content">'+votes+'</div>';
-                            
-                            infowindow = new google.maps.InfoWindow({
-                                content: contentString, 
-                                position: this.center,
-                                map: map
-                            });
-                            
-                            //HIER AFWERKEN
-                            
-
-                        });
-                        moodCircle.voteBalance = 0;
-                        if (moodCircle.votes) {
-                            for (var i in moodCircle.votes) {
-                                if (moodCircle.votes[i].mood == "happy")
-                                    moodCircle.voteBalance++;
-                                if (moodCircle.votes[i].mood == "unhappy")
-                                    moodCircle.voteBalance--;
-                            }
-                        }
-                        if (moodCircle.voteBalance > 0) {
-                            moodCircle.setOptions({
-                                fillColor: '#fff200',
-                            });
-                        }
-                        
-                        if (moodCircle.voteBalance < 0) {
-                            moodCircle.setOptions({
-                                fillColor: '#2cabff',
-                            });
-                        }
-                        if (moodCircle.voteBalance == 0) {
-                            if (moodCircle.votes[moodCircle.votes.length-1].mood == "happy") {
-                                moodCircle.setOptions({
-                                    fillColor: '#fff200'
-                                });
-                            } else {
-                                moodCircle.setOptions({
-                                    fillColor: '#2cabff'
-                                });
-                            }
-                        }
-                        
-                        var multiplier = moodCircle.voteBalance;
-                        if (moodCircle.voteBalance < 0)
-                            multiplier = multiplier * (-1);
-                        if(multiplier != 0)
-                            moodCircle.setRadius(30 + (20 * multiplier) - 20)
-                        if (multiplier == 0)
-                            moodCircle.setRadius(30 + (20 * multiplier))
-                        
-                        if (moodCircle.votes)
-                            for (var item in moodCircle.votes) {
-                                moodCircle.votes[item].name = moodCircle.name;
-                                moodCircle.votes[item].city = moodCircle.city;
-                                votes.push(moodCircle.votes[item]);
-                            }
-
-                        circles.push(moodCircle);
-                    }
+                    
                     votes.sort(function (a, b) {
                         return (Date.parse(b.Date) - Date.parse(a.Date));
                     });
                     votes.splice(10, votes.length - 10)
-                    $('#collapseOne > .panel-body >.panel').each(function () {
+                    $('#collapseTwo > .panel-body >.panel').each(function () {
                         $(this).remove();
                     })
                     for (var ii in votes) {
                         var loc = "";
                         var src = "";
+                        var placeLoc = "";
                         if (votes[ii].voter.image)
                             src = "style = 'background-image: url(/userimages/" + votes[ii].voter.image + ")'";
                         if (votes[ii].voter.location)
                             loc = votes[ii].voter.location;
                         var img = "<div class='img-circle profile-item-image' " + src + " ' ></div>";
-                        var content="<div class='col-xs-6'>"+img+"</div><div class='col-xs-6'>"+ votes[ii].voter.name+"<br>"+ loc+"</div>"
-                        var obj = $('<div class="panel"><div class="panel-body activity-item"><a class="hoverUser" href="/profile/' + votes[ii].voter.username + '"  data-html="true" data-content="'+ content+'"  rel="popover" data-original-title="' + votes[ii].voter.username + '" data-trigger="hover" data-userId="' + votes[ii].voter._id + '"> ' + votes[ii].voter.username + '</a> was <span class="' + votes[ii].mood + '">' + votes[ii].mood + '</span> around <a href="#">' + votes[ii].name  + '</a>.<br><strong>' + FriendlyDate(votes[ii].Date) + ' ago</strong></div></div>');
-                        $("#collapseOne > .panel-body").append(obj);
+                        var content = "<div class='col-xs-6'>" + img + "</div><div class='col-xs-6'>" + votes[ii].voter.name + "<br>" + loc + "</div>"
+                        if (votes[ii].type == "moodCircle")
+                            placeLoc = 'around <a class="location-link" data-type="' + votes[ii].type + '" data-locId="' + votes[ii].id + '" href="#">' + votes[ii].name + '</a>';
+                        if (votes[ii].type == "event")
+                            placeLoc = 'at the <a class="location-link" data-type="' + votes[ii].type + '" data-locId="' + votes[ii].id + '" href="#">' + votes[ii].name + '</a> event in ' + votes[ii].city;
+                        var obj = $('<div class="panel"><div class="panel-body activity-item"><a class="hoverUser" href="/profile/' + votes[ii].voter.username + '"  data-html="true" data-content="' + content + '"  rel="popover" data-original-title="' + votes[ii].voter.username + '" data-trigger="hover" data-userId="' + votes[ii].voter._id + '"> ' + votes[ii].voter.username + '</a> was <span class="' + votes[ii].mood + '">' + votes[ii].mood + '</span> ' + placeLoc + '.<br><strong>' + FriendlyDate(votes[ii].Date) + ' ago</strong></div></div>');
+                        $("#collapseTwo > .panel-body").append(obj);
                         obj.children(".panel-body").children(".hoverUser").popover({ trigger: "hover" });
-
-                       
+                        obj.children(".panel-body").children(".location-link").click(function (e) {
+                            e.preventDefault();
+                            if ($(this).attr("data-type") == "event") {
+                                for (var ev in events) {
+                                    if (events[ev].id == $(this).attr("data-locid")) {
+                                        map.setCenter(events[ev].center);
+                                        map.setZoom(17);
+                                    }
+                                }
+                            }
+                            if ($(this).attr("data-type") == "moodCircle") {
+                                for (var ci in circles) {
+                                    if (circles[ci].id == $(this).attr("data-locid")) {
+                                        map.setCenter(circles [ci].center);
+                                        map.setZoom(17);
+                                    }
+                                }
+                            }
+                        });
                     }
-
-                } else if (this.status == 204) {
-                    while (events[0]) {
-                        events.pop().setMap(null);
-                    }
-                    $('#AdminEventsBody .panel-success').each(function () {
-                        this.remove();
-                    });
-                } else {
-
-                }
+                });
             });
-
         } else {
             while (events[0]) {
                 events.pop().setMap(null);
@@ -314,6 +352,9 @@ function initMap() {
             $('#AdminEventsBody .panel-success').each(function () {
                 this.remove();
             })
+            while (circles[0]) {
+                circles.pop().setMap(null);
+            }
         }
     })
     
@@ -347,7 +388,6 @@ function initMap() {
             map.setCenter(pos);
             map.setZoom(15);
         }, function () {
-            handleLocationError(true, infoWindow, map.getCenter());
         });
     } else {
         // Browser doesn't support Geolocation
@@ -355,12 +395,6 @@ function initMap() {
     }
 }
 
-function showArrays(event){
-    console.log(this.center.lat());
-    console.log(this.center.lng());
-    console.log(this.getRadius());
-    
-}
 
 function handleLocationError(browserHasGeolocation, infoWindow, pos) {
     infoWindow.setPosition(pos);
@@ -372,8 +406,6 @@ function handleLocationError(browserHasGeolocation, infoWindow, pos) {
 
 function initMapDependencies() {
     //source: http://stackoverflow.com/questions/17191664/why-getprojection-is-not-working-in-v3
-    
-
 
     $("#StatusOverlay img").draggable({
         containment : [0, 80, $(map.getDiv()).width()-50, $(map.getDiv()).height()+25],
@@ -406,7 +438,6 @@ function initMapDependencies() {
                 if (google.maps.geometry.poly.containsLocation(ll, events[val])) {
                     var event = events[val];
                
-                    console.log(events[val].name)
 
                     isWithinEvent = true;
                     params = "id=" + events[val].id + "&vote=" + mood;
@@ -419,8 +450,6 @@ function initMapDependencies() {
                                 event.voteBalance++;
                             if (mood == "unhappy")
                                 event.voteBalance--;
-                            console.log(mood);
-                            console.log(event.voteBalance)
                             if (event.voteBalance > 0) {
                                 event.setOptions({
                                     fillColor: '#fff200',
@@ -469,7 +498,6 @@ function initMapDependencies() {
                                             currCircle.voteBalance--;
                                     }
                                 }
-                                console.log(currCircle.voteBalance);  
                                 if (currCircle.voteBalance > 0) {
                                     currCircle.setOptions({
                                         fillColor: '#fff200',
@@ -620,7 +648,97 @@ function setZoomAnimation(mappy, zoomlevel){
 }
 
 $(function () {
+    XHRPost("/api/event/getFriendUpdates", "", function () {
+
+        if (this.status == 200) {
+            var res = JSON.parse(this.responseText);
+            
+            for (var i in res) {
+                if (res[i].type == "event") { 
+                    for (var ev in events) {
+                        if (events[ev].id == res[i].id) {
+                            isFound = true;
+                        }
+                    }
+                    if (!isFound)
+                        OutOfMapLocations.push({id: res[i].id ,center: { lng: res[i].center.Lng, lat: res[i].center.Lat } })
+                }
+                if (res[i].type == "moodCircle") {
+
+                    var isFound = false;
+                    for (var ci in circles) {
+                        if (circles[ci].id == res[i].id) {
+                            isFound = true;
+                        }
+                    }
+                    if (!isFound)
+                        OutOfMapLocations.push({ id: res[i].id , center: { lng: res[i].center.Lng, lat: res[i].center.Lat } })
+                }
+
+                var loc = "";
+                var src = "";
+                var placeLoc = "";
+                if (res[i].voter.image)
+                    src = "style = 'background-image: url(/userimages/" + res[i].voter.image + ")'";
+                if (res[i].voter.location)
+                    loc = res[i].voter.location;
+                var img = "<div class='img-circle profile-item-image' " + src + " ' ></div>";
+                var content = "<div class='col-xs-6'>" + img + "</div><div class='col-xs-6'>" + res[i].voter.name + "<br>" + loc + "</div>"
+                if (res[i].type == "moodCircle")
+                    placeLoc = 'around <a class="location-link" data-type="' + res[i].type + '" data-locId="' + res[i].id + '" href="#">' + res[i].name + ', '+ res[i].location+'</a>';
+                if (res[i].type == "event")
+                    placeLoc = 'at the <a class="location-link" data-type="' + res[i].type + '" data-locId="' + res[i].id + '" href="#">' + res[i].name + '</a> event in ' + res[i].location;
+                var obj = $('<div class="panel"><div class="panel-body activity-item"><a class="hoverUser" href="/profile/' + res[i].voter.username + '"  data-html="true" data-content="' + content + '"  rel="popover" data-original-title="' + res[i].voter.username + '" data-trigger="hover" data-userId="' + res[i].voter._id + '"> ' + res[i].voter.username + '</a> was <span class="' + res[i].mood + '">' + res[i].mood + '</span> ' + placeLoc + '.<br><strong>' + FriendlyDate(res[i].Date) + ' ago</strong></div></div>');
+                $("#collapseOne > .panel-body").append(obj);
+                obj.children(".panel-body").children(".hoverUser").popover({ trigger: "hover" });
+                obj.children(".panel-body").children(".location-link").click(function (e) {
+                    e.preventDefault();
+                    if ($(this).attr("data-type") == "event") {
+                        var isFound = false;
+                        for (var ev in events) {
+                            if (events[ev].id == $(this).attr("data-locid")) {
+                                isFound = true;
+                                map.setCenter(events[ev].center);
+                                map.setZoom(16
+                                );
+                            }
+                        }
+                        if (!isFound) {
+                            for (var o in OutOfMapLocations) {
+                                if (OutOfMapLocations[o].id == $(this).attr("data-locid")) {
+                                    map.setCenter(OutOfMapLocations[o].center);
+                                    map.setZoom(16);
+                                }
+                            }
+                        }
+                    }
+                    if ($(this).attr("data-type") == "moodCircle") {
+                        var isFound = false;
+                        for (var ci in circles) {
+                            if (circles[ci].id == $(this).attr("data-locid")) {
+                                isFound = true;
+                                map.setCenter(circles [ci].center);
+                                map.setZoom(17);
+                            }
+                        }
+                        if (!isFound) {
+                            console.log(OutOfMapLocations);
+                            for (var o in OutOfMapLocations) {
+                                if (OutOfMapLocations[o].id == $(this).attr("data-locid")) {
+                                    map.setCenter(OutOfMapLocations[o].center);
+                                    map.setZoom(17);
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+        }
+    });
     
+
+    $(".dropdown-toggle").dropdown();
 
     $("#menu-toggle").click(function (e) {
         $('#wrapper').toggleClass("activebar");
@@ -715,12 +833,13 @@ function FriendlyDate(date1) {
     var seconds = Math.round((Date.now() - Date.parse(date1))/1000);
     var minutes = Math.round(seconds / 60);
     var hours = Math.round(minutes / 60);
-
-    if (hours >= 1)
-        return hours+" hours";
-    if (minutes >= 1)
-        return minutes + " minutes";
-    else
-        return seconds + " seconds";
+    var days = Math.round(hours / 24);
+    if (days == 1) return "A day";
+    else if (days > 1) return days + " days";
+    else if (hours == 1) return "An hour";
+    else if (hours >= 1) return hours + " hours";
+    else if (minutes == 1) return "A minute";
+    else if (minutes >= 1) return minutes + " minutes";
+    else return seconds + " seconds";
 
 }

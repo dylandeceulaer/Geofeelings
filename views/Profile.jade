@@ -15,7 +15,7 @@ append scripts
     script(src='/javascripts/effects.js')
     script(src='/javascripts/profileEdit.js')
 block content
-
+    -function FriendlyDate(date1) {var seconds = Math.round((Date.now() - Date.parse(date1)) / 1000); var minutes = Math.round(seconds / 60); var hours = Math.round(minutes / 60); var days = Math.round(hours/24);if(days == 1) return "A day"; if(days>1) return days+" days"; if (hours == 1) return "An hour"; if (hours >= 1) return hours + " hours"; if (minutes == 1) return "A minute"; if (minutes >= 1) return minutes + " minutes"; else return seconds + " seconds";}
     .PageFiller
         .profile-header
             .img-circle.profile-pic(style=typeof qryUser.image === "undefined" ? "" : 'background-image: url(/userimages/#{qryUser.image})' )
@@ -59,10 +59,16 @@ block content
                     .panel-heading
                         h3.panel-title Recent Actions
                     .panel-body
-                        .panel
-                            .panel-body.text-capitalize #{qryUser.username} was <span class="happy">happy</span> at the <a href="#">Laundry day</a> event in <a href="#">Antwerp</a>.
-                        .panel
-                            .panel-body.text-capitalize #{qryUser.username} was <span class="unhappy">unhappy</span> at the <a href="#">Student Festival</a> event in <a href="#">Sint-Niklaas</a>.
+                        if qryUser.updates
+                            each val in qryUser.updates
+                                if(val.type=="event")
+                                    .panel
+                                        .panel-body.profile-action-item <strong>#{qryUser.username}</strong> was <span class="#{val.mood.toLowerCase()}">#{val.mood}</span> at the <strong>#{val.name}</strong> event in <strong>#{val.location}</strong><br> <i>#{FriendlyDate(val.Date)} ago</i>.
+                                if(val.type=="moodCircle")
+                                    .panel
+                                        .panel-body.profile-action-item <strong>#{qryUser.username}</strong> was <span class="#{val.mood.toLowerCase()}">#{val.mood}</span> around <strong>#{val.name}</strong>, <strong>#{val.location}</strong><br><i>#{FriendlyDate(val.Date)} ago</i>.
+                        else
+                            i Nothing new happened.
             
                 .panel.panel-default
                     .panel-heading

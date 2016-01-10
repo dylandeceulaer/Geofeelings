@@ -1,5 +1,5 @@
 ﻿$(function () {
-
+   
     function XHRPost(url, param, cb) {
         var oReq = new XMLHttpRequest();
         oReq.open("POST", url, true);
@@ -107,5 +107,6 @@
             }
         });
     });
+    
     
 })

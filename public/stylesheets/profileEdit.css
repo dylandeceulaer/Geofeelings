@@ -62,7 +62,7 @@
 
 
 .happy{
-    color:greenyellow;
+    color:#f5b800;
 }
 .unhappy{
     color:blue;
@@ -96,13 +96,7 @@
     height:60px;
     width:60px;
 }
-.profile-action-item:hover:before{
-     content:"\f00d";
-     font-family:FontAwesome;
-     cursor:pointer;
-     position:absolute;
-     left:90%;
- }
+
 
 .alert{
     position:absolute;

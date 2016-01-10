@@ -7,6 +7,7 @@ append styles
 
     
 append scripts
+    script(src='/javascripts/IndexSockets.js')
     script(src='http://code.jquery.com/ui/1.10.3/jquery-ui.js')
     script(src="/javascripts/jquery.ui.touch-punch.js")
     script(src='/javascripts/effects.js')
@@ -18,7 +19,9 @@ append scripts
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCs_9qVC8-LjAinVOR0zY64frEZTCxqoeU&libraries=places&callback=initMap">
     <script src="/javascripts/awesomplete.js" async></script>
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-    </script>
+    <script src="/socket.io/socket.io.js"></script>
+        
+    
 
 block content
     .PageFiller#wrapper
@@ -43,21 +46,21 @@ block content
                     .panel-heading#headingOne(role="tab" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne")
                         h4.panel-title
                             a(role="button" )
-                                ='Local Activity'
+                                ='Friend Activity'
                     #collapseOne.panel-collapse.collapse.in(role="tabpanel" aria-labelledby="headingOne")
                         .panel-body
                 .panel.panel-default
                     .panel-heading#headingTwo(role="tab" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo")
                         h4.panel-title
                             a(role="button" )
-                                ='Events'
+                                ='Local Activity'
                     #collapseTwo.panel-collapse.collapse(role="tabpanel" aria-labelledby="headingTwo")
                         .panel-body
                 .panel.panel-default
                     .panel-heading#headingThree(role="tab" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="true" aria-controls="collapseThree")
                         h4.panel-title
                             a(role="button")
-                                ='Friend Activity'
+                                ='Events'
                     #collapseThree.panel-collapse.collapse(role="tabpanel" aria-labelledby="headingThree")
                         .panel-body
                 if(user.role && user.role.name == "Administrator")
@@ -73,26 +76,3 @@ block content
     .container
         p(id="about") Welcome to #{title}
         +alert-info("This is a sample info alert.")
-
-        //
-            +alert-info("This is a sample info alert.")
-            +alert-info("This is a sample info alert.")
-            +navbar("Project name","dropdown_menu")
-            +navbar("Project name","dropdown_menu","inverse")
-            +navbar("Project name","dropdown_menu")
-                +nav_item("index.html","active") Home
-                +nav_item("about.html") About
-                +nav_item("contact.html") Contact
-            +navbar("Project name","dropdown_menu")
-                +nav_item("index.html","active") Home
-                +nav_item("about.html") About
-                +nav_item("contact.html") Contact
-                +nav_item_dropdown("#")(label="Dropdown")
-                    +nav_item("#") Action
-                    +nav_item("#") Another Action
-                    +nav_item("#") Something else here
-                    +nav_divider
-                    +nav_header Nav header
-                    +nav_item("#") Separated link
-                    +nav_item("#") One more separated link
-        //
