@@ -44,11 +44,11 @@
     <Compile Include="data\models\role.js" />
     <Compile Include="data\models\user.js" />
     <Compile Include="data\models\usersRepo.js" />
-    <Compile Include="data\schemas\comment.js" />
-    <Compile Include="data\schemas\moodCircle.js" />
-    <Compile Include="data\schemas\event.js" />
-    <Compile Include="data\schemas\role.js" />
-    <Compile Include="data\schemas\user.js" />
+    <Compile Include="data\models\schemas\comment.js" />
+    <Compile Include="data\models\schemas\moodCircle.js" />
+    <Compile Include="data\models\schemas\event.js" />
+    <Compile Include="data\models\schemas\role.js" />
+    <Compile Include="data\models\schemas\user.js" />
     <Compile Include="public\javascripts\app.js" />
     <Compile Include="public\javascripts\awesomplete.min.js" />
     <Compile Include="public\javascripts\bootbox.min.js" />
@@ -58,6 +58,7 @@
     <Compile Include="public\javascripts\index.js" />
     <Compile Include="public\javascripts\indexAuthorized.js" />
     <Compile Include="public\javascripts\indexEffects.js" />
+    <Compile Include="public\javascripts\IndexSockets.js" />
     <Compile Include="public\javascripts\jquery.ui.touch-punch.js" />
     <Compile Include="public\javascripts\map.js" />
     <Compile Include="public\javascripts\profileEdit.js" />
@@ -128,7 +129,7 @@
     <Folder Include="bin\" />
     <Folder Include="data\" />
     <Folder Include="data\models\" />
-    <Folder Include="data\schemas\" />
+    <Folder Include="data\models\schemas\" />
     <Folder Include="public\javascripts\controllers\" />
     <Folder Include="public\javascripts\services\" />
     <Folder Include="public\javascripts\vendor\jquery\" />

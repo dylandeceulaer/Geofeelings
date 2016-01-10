@@ -17,7 +17,6 @@ MoodCircleRepo = (function () {
         });
     },  
         getMoodCirclesInScope = function (latMin, latMax, lngMin, lngMax, next, isPopulated, fromHour, toHour) {
-           
 
             fromHour = (typeof x === 'undefined') ? 12 : fromHour;
             toHour = (typeof x === 'undefined') ? 0 : toHour;
@@ -52,7 +51,44 @@ MoodCircleRepo = (function () {
                         next(null, res);
                 });
             }
-    },
+        },
+        getUserUpdates = function (UserId, next, maxUpdates) {
+            maxUpdates = (typeof x === 'undefined') ? 5 : maxUpdates;
+            MoodCircle.find({ "votes.voter" : UserId }, { votes: 1, name: 1, city: 1 }).sort("votes.Date").limit(maxUpdates).exec(function (err, res) {
+                if (err) {
+                    console.log(err);
+                    next(err, null);
+                } else if (res.length < 1) {
+                    next("No records found");
+                }
+                else {
+                    for (var ii in res) {
+                        for (var i in res[ii].votes) {
+                            if (!res[ii].votes[i].voter || !res[ii].votes[i].voter.equals(UserId))
+                                delete res[ii].votes[i];
+                        }
+                    }
+                    next(null, res);
+                }
+            });
+        },
+        getFriendUpdates = function (Friends, next, maxUpdates) {
+            maxUpdates = (typeof x === 'undefined') ? 10 : maxUpdates;
+            var fromDate = new Date();
+            fromDate.setHours(fromDate.getHours() - 6);
+            MoodCircle.find({ $or: Friends }, { votes: 1, name: 1, city: 1, center: 1 }).sort("votes.Date").populate('votes.voter').limit(10).where('votes.Date').gte(fromDate).exec(function (err, res) {
+                if (err) {
+                    console.log(err);
+                    next(err, null);
+                } else if (res.length < 1) {
+                    next("No records found");
+                }
+                else {
+                    
+                    next(null, res);
+                }
+            });
+        },
         updateVotes = function (id,vote,voterId, next) {
             MoodCircle.findOne({ _id: id }).exec(function (err, res) {
                 if (res.votes.length == 0)
@@ -62,12 +98,13 @@ MoodCircleRepo = (function () {
                 }else {
                     res.votes.push({ voter: voterId, mood: "unhappy" });
                 }
-                res.save(function (err, res) {
+                res.save(function (err, result) {
                     if (err) {
                         console.error(err);
                         next(err, null);
                     } else {
-                        next(null, "ok");
+                        res.vot
+                        next(null, res);
                     }
                 });
             });
@@ -92,7 +129,9 @@ MoodCircleRepo = (function () {
         getMoodCircles : getMoodCircles ,
         updateVotes: updateVotes,
         getById: getById,
-        getMoodCirclesInScope: getMoodCirclesInScope
+        getMoodCirclesInScope: getMoodCirclesInScope,
+        getUserUpdates: getUserUpdates,
+        getFriendUpdates: getFriendUpdates
     };
 })();
 

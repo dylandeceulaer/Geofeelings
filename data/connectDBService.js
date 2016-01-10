@@ -10,6 +10,7 @@
 
 module.exports = (function (configURL, database) {
     //var mongoose = database;
+
     var db = database.connect(configURL);// connecteer de database
     
     database.connection.on("open", function () {
@@ -33,8 +34,6 @@ module.exports = (function (configURL, database) {
     database.connection.on("close", function () {
         console.log("connection closed: ", configURL);
     });
-    
-    
     
     return database; // mongoose connected
 });

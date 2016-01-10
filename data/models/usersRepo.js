@@ -98,23 +98,23 @@ UsersRepo = (function () {
                                         if (!err) {
                                             return next(null, result);
                                         } else {
-                                            console.log(err);
+                                            console.log("stap 4", err);
                                             return next("something went wrong");
                                         }
                                     });
                                 } else {
-                                    console.log(err);
+                                    console.log("stap 3", err);
                                     return next("something went wrong");
                                 }
                             });
                         }
                         else {
-                            console.log(err);
+                            console.log("stap 2", err);
                             return next("something went wrong");
                         }
                     });
                 } else {
-                    console.log(err);
+                    console.log ("stap 1", err);
                     return next("something went wrong");
                 }
             });
