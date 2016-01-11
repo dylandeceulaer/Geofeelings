@@ -8,7 +8,8 @@ var emitter = new (require('events').EventEmitter)();
 var usersRepo = require("./data/models/usersRepo.js");
 var User = require("./data/models/user.js");
 var router = require("./routes/api/event.js");
-//var app = require("./app.js");
+var routerChat = require("./routes/api/chat.js");
+
 
 module.exports = function (io , mongoose) {
     var ActiveSockets = [];
@@ -16,7 +17,6 @@ module.exports = function (io , mongoose) {
     router.emitter.on("friendMessage", function (user, data) {
         for (var i = 0; i < ActiveSockets.length; i++) {
             if (ActiveSockets[i].UserId == user) {
-                console.log("deze ist", user);
                 io.sockets.connected[ActiveSockets[i].id].emit("FriendUpdate", data)
             }
         }
@@ -33,6 +33,17 @@ module.exports = function (io , mongoose) {
             }
         }
     });
+    routerChat.emitter.on("sendMessageToReceiver", function (sender, receiver, chatId, message) {
+        for (var i = 0; i < ActiveSockets.length; i++) {
+            if (ActiveSockets[i].UserId == sender) {
+                io.sockets.connected[ActiveSockets[i].id].emit("MessageSuccess", receiver, chatId, message)
+            }
+            if (ActiveSockets[i].UserId == receiver) {
+                io.sockets.connected[ActiveSockets[i].id].emit("NewMessage", sender,chatId,message)
+            }
+        }
+    })
+    
 
     function updateOrAdd(id,userid, loc, next){
         var isFound = false;
@@ -50,10 +61,13 @@ module.exports = function (io , mongoose) {
     }
 
     io.sockets.on('connection', function (socket) {   
-
         
         socket.on('updateLocation', function (id,loc) {
             updateOrAdd(socket.id,id,loc, function () { })
+        });
+        
+        socket.on('sendMessage', function (chatid, userId, message) {
+            routerChat.emitter.emit("sendMessage", chatid, userId, message, function () { })
         });
         
         router.emitter.on("friendMessage", function (user, data) {

@@ -43,23 +43,23 @@ block content
                     .panel-heading
                         h3.panel-title Friends
                     .panel-body
-                        if(qryUser.friends)
+                        if(qryUser.friends && qryUser.friends.length >0)
                             each val in qryUser.friends
                                 if(val.isAccepted && !val.isBlocked)
                                     .friend-item
                                         a(href="/profile/#{val.user.username}")
                                             .img-circle.friend-item-image(style=typeof val.user.image === "undefined" ? "" : 'background-image: url(/userimages/#{val.user.image})' )
                                         p #{val.user.username}
-
                         else
-                            i No friends yet :(
+                            .empty
+                                i No friends yet
                                      
             .col-lg-7         
                 .panel.panel-default
                     .panel-heading
                         h3.panel-title Recent Actions
                     .panel-body
-                        if qryUser.updates
+                        if qryUser.updates && qryUser.updates.length > 0
                             each val in qryUser.updates
                                 if(val.type=="event")
                                     .panel
@@ -68,7 +68,8 @@ block content
                                     .panel
                                         .panel-body.profile-action-item <strong>#{qryUser.username}</strong> was <span class="#{val.mood.toLowerCase()}">#{val.mood}</span> around <strong>#{val.name}</strong>, <strong>#{val.location}</strong><br><i>#{FriendlyDate(val.Date)} ago</i>.
                         else
-                            i Nothing new happened.
+                            .empty
+                                i Nothing new happened.
             
                 .panel.panel-default
                     .panel-heading
@@ -85,7 +86,8 @@ block content
                                             .panel-body #{val.comment}
                         else
                             .col-xs-12
-                                i No comments yet.                    
+                                .empty
+                                    i No comments yet.                    
                            
                                 
                                 

@@ -29,6 +29,8 @@ function XHRGet(url, cb) {
     oReq.send();
 }
 
+
+
 function addEvent(res) {
     var cords = [];
     for (var i in res.points) {
@@ -72,62 +74,96 @@ function addEvent(res) {
         });
     }
     
-    rectangle.addListener('click', function () {
-        document.getElementById("link" + this.id).click();
-    });
+    if (user.role.name == "Administrator") {
+        rectangle.addListener('click', function () {
+            document.getElementById("link" + this.id).click();
+        });
+    }
     events.push(rectangle);
-    var id = Math.round(Math.random() * 10000000000000000);
-    var object = $('<div class="panel panel-success"><div class="panel-heading"><h4 class="panel-title"><a id="link' + res._id + '" data-toggle="collapse" href="#' + id + '">' + rectangle.name + ', ' + rectangle.location + '</a></h4></div><div id="' + id + '" class="panel-collapse collapse"><div class="panel-body" id="' + res._id + '"><input class="form-control input-name" placeholder="name" value="' + rectangle.name + '"/><input class="form-control input-location" placeholder="location" value="' + rectangle.location + '"/><button class="event-button locate-event btn btn-default">Locate</button><button class="event-button delete-event btn btn-default">Delete</button></div></div></div>').insertAfter($("#AdminEventsBody").children().last());
     
-    var elements = object.children(".panel-collapse").children().first();
-    elements.children(".input-location").change(function (e) {
-        var params = "id=" + $(this).parent().attr("id") + "&location=" + $(this).val();
-        var obj = this;
-        XHRPost("/api/event/updateEvent", params, function () {
-            if (this.status == 200) {
-                updateTitle(obj)
-            }
+    if (user.role.name == "Administrator") {
+        var id = Math.round(Math.random() * 10000000000000000);
+        var object = $('<div class="panel panel-success"><div class="panel-heading"><h4 class="panel-title"><a id="link' + res._id + '" data-toggle="collapse" href="#' + id + '">' + rectangle.name + ', ' + rectangle.location + '</a></h4></div><div id="' + id + '" class="panel-collapse collapse"><div class="panel-body" id="' + res._id + '"><input class="form-control input-name" placeholder="name" value="' + rectangle.name + '"/><input class="form-control input-location" placeholder="location" value="' + rectangle.location + '"/><button class="event-button locate-event btn btn-default">Locate</button><button class="event-button delete-event btn btn-default">Delete</button></div></div></div>').insertAfter($("#AdminEventsBody").children().last());
+        
+        var elements = object.children(".panel-collapse").children().first();
+        elements.children(".input-location").change(function (e) {
+            var params = "id=" + $(this).parent().attr("id") + "&location=" + $(this).val();
+            var obj = this;
+            XHRPost("/api/event/updateEvent", params, function () {
+                if (this.status == 200) {
+                    updateTitle(obj)
+                }
+            });
         });
-    });
-    elements.children(".delete-event").click(function (e) {
-        var thiss = this;
-        bootbox.confirm("Are you sure you want to delete this event?", function (ev) {
-            if (ev) {
-                var id = $(thiss).parent().attr("id")
-                var params = "id=" + id;
-                var obj = thiss;
-                XHRPost("/api/event/deleteEvent", params, function () {
-                    if (this.status == 200) {
-                        for (var value in events) {
-                            if (events[value].id == id) {
-                                events[value].setMap(null);
-                                delete events[value]
+        elements.children(".delete-event").click(function (e) {
+            var thiss = this;
+            bootbox.confirm("Are you sure you want to delete this event?", function (ev) {
+                if (ev) {
+                    var id = $(thiss).parent().attr("id")
+                    var params = "id=" + id;
+                    var obj = thiss;
+                    XHRPost("/api/event/deleteEvent", params, function () {
+                        if (this.status == 200) {
+                            for (var value in events) {
+                                if (events[value].id == id) {
+                                    events[value].setMap(null);
+                                    delete events[value]
+                                }
                             }
+                            $(obj).parent().parent().parent().remove();
                         }
-                        $(obj).parent().parent().parent().remove();
-                    }
-                });
-            }
+                    });
+                }
+            });
         });
-    });
+        elements.children(".locate-event").click(function (e) {
+            map.setCenter(rectangle.center);
+            map.setZoom(16);
+        });
+        elements.children(".input-name").change(function (e) {
+            var params = "id=" + $(this).parent().attr("id") + "&name=" + $(this).val();
+            var obj = this;
+            XHRPost("/api/event/updateEvent", params, function () {
+                if (this.status == 200) {
+                    updateTitle(obj)
+                }
+            });
+                        
+        });
+        function updateTitle(obj) {
+            $(obj).parent().parent().parent().children(".panel-heading").children("h4").children("a").text($(obj).parent().children(".input-name").val() + ", " + $(obj).parent().children(".input-location").val());
+        }
+    }
+    
+    $("#collapseThree > .panel-body > .empty").remove();
+    
+    var color = "#f5f5f5";
+    if (rectangle.voteBalance > 0)
+        color = "#fad400";
+    if (rectangle.voteBalance < 0)
+        color = "#2cabff";
+    
+    var thisvotes = rectangle.votes;
+    thisvotes.splice(0, thisvotes.length-3);
+    var votesdiv = "";
+    for (var v in thisvotes) {
+        var loc = "";
+        var src = "";
+        if (thisvotes[v].voter.image)
+            src = "style = 'background-image: url(/userimages/" + thisvotes[v].voter.image + ")'";
+        if (thisvotes[v].voter.location)
+            loc = thisvotes[v].voter.location;
+        var img = "<div class='img-circle profile-item-image' " + src + " ' ></div>";
+        var content = "<div class='col-xs-6'>" + img + "</div><div class='col-xs-6'>" + thisvotes[v].voter.name + "<br>" + loc + "</div>"
+        votesdiv = votesdiv + '<br><a class="hoverUser" href="/profile/' + thisvotes[v].voter.username + '"  data-html="true" data-content="' + content + '"  rel="popover" data-original-title="' + thisvotes[v].voter.username + '" data-trigger="hover" data-userId="' + thisvotes[v].voter._id + '"> ' + thisvotes[v].voter.username + '</a> was <span class="' + thisvotes[v].mood + '">' + thisvotes[v].mood + '</span> - <strong>' + FriendlyDate(thisvotes[v].Date) + ' ago</strong>';
+    }
+    var obj = $('<div class="panel panel-default"><div class="panel-heading" style="background-color:' + color + '"><h4 class="panel-title" >' + rectangle.name + ', ' + rectangle.location + '</h4></div><div class="panel-body" id="' + res._id + '"><strong>Latest votes:</strong>'+ votesdiv+'<button class="event-button locate-event btn btn-default">Locate</button></div></div>');
+    var object = $("#collapseThree > .panel-body").append(obj);
+    var elements = obj.children(".panel-body");
     elements.children(".locate-event").click(function (e) {
         map.setCenter(rectangle.center);
         map.setZoom(16);
     });
-    elements.children(".input-name").change(function (e) {
-        var params = "id=" + $(this).parent().attr("id") + "&name=" + $(this).val();
-        var obj = this;
-        XHRPost("/api/event/updateEvent", params, function () {
-            if (this.status == 200) {
-                updateTitle(obj)
-            }
-        });
-                        
-    });
-    function updateTitle(obj) {
-        $(obj).parent().parent().parent().children(".panel-heading").children("h4").children("a").text($(obj).parent().children(".input-name").val() + ", " + $(obj).parent().children(".input-location").val());
-    }
-    
     if (rectangle.votes)
         for (var item in rectangle.votes) {
             rectangle.votes[item].type = "event";
@@ -167,8 +203,6 @@ function addMoodCircle(res) {
             position: this.center,
             map: map
         });
-
-
     });
     moodCircle.voteBalance = 0;
     if (moodCircle.votes) {
@@ -218,6 +252,21 @@ function addMoodCircle(res) {
             moodCircle.votes[item].city = moodCircle.city;
             votes.push(moodCircle.votes[item]);
         }
+    moodCircle.addListener("rightclick", function (event) {
+        var thiss = this;
+        bootbox.confirm("Do you want to delete the following moodCircle: " +thiss.name+", "+thiss.city, function (ev) {
+            if (ev) {
+                var id = thiss.id
+                var params = "id=" + id;
+                console.log(id);
+                XHRPost("/api/event/deleteMoodCirle", params, function () {
+                    if (this.status == 200) {
+                        thiss.setMap(null);   
+                    }
+                });
+            }
+        });
+    });
     
     circles.push(moodCircle);
 
@@ -240,6 +289,7 @@ function initMap() {
     
     map.addListener("idle", function (e){
         votes = [];
+        //Following function is located in IndexSockets.js
         updateLocation(user._id, map.getCenter());
 
         var modifier = 0;
@@ -262,6 +312,9 @@ function initMap() {
                     $('#AdminEventsBody .panel-success').each(function () {
                         this.remove();
                     })
+                    $('#collapseThree > .panel-body > .panel').each(function () {
+                        this.remove();
+                    })
                     
                     var res = JSON.parse(this.responseText);
                     for (var ii in res) {
@@ -271,6 +324,9 @@ function initMap() {
                     while (events[0]) {
                         events.pop().setMap(null);
                     }
+                    $('#collapseThree > .panel-body > .panel').each(function () {
+                        this.remove();
+                    })
                     $('#AdminEventsBody .panel-success').each(function () {
                         this.remove();
                     });
@@ -307,6 +363,7 @@ function initMap() {
                         $(this).remove();
                     })
                     for (var ii in votes) {
+
                         var loc = "";
                         var src = "";
                         var placeLoc = "";
@@ -321,6 +378,7 @@ function initMap() {
                         if (votes[ii].type == "event")
                             placeLoc = 'at the <a class="location-link" data-type="' + votes[ii].type + '" data-locId="' + votes[ii].id + '" href="#">' + votes[ii].name + '</a> event in ' + votes[ii].city;
                         var obj = $('<div class="panel"><div class="panel-body activity-item"><a class="hoverUser" href="/profile/' + votes[ii].voter.username + '"  data-html="true" data-content="' + content + '"  rel="popover" data-original-title="' + votes[ii].voter.username + '" data-trigger="hover" data-userId="' + votes[ii].voter._id + '"> ' + votes[ii].voter.username + '</a> was <span class="' + votes[ii].mood + '">' + votes[ii].mood + '</span> ' + placeLoc + '.<br><strong>' + FriendlyDate(votes[ii].Date) + ' ago</strong></div></div>');
+                        $("#collapseTwo > .panel-body > .empty").remove();
                         $("#collapseTwo > .panel-body").append(obj);
                         obj.children(".panel-body").children(".hoverUser").popover({ trigger: "hover" });
                         obj.children(".panel-body").children(".location-link").click(function (e) {
@@ -350,6 +408,12 @@ function initMap() {
                 events.pop().setMap(null);
             }
             $('#AdminEventsBody .panel-success').each(function () {
+                this.remove();
+            })
+            $('#collapseTwo > .panel-body > .panel').each(function () {
+                this.remove();
+            })
+            $('#collapseThree > .panel-body > .panel').each(function () {
                 this.remove();
             })
             while (circles[0]) {
@@ -623,6 +687,38 @@ function initMapDependencies() {
     });
 }
 
+function startChat(userId, username){
+    
+    if ($("ul.pagination.pagination-sm > li[data-userid='" + userId + "']").length < 1) {
+        $("ul.pagination.pagination-sm > li").removeClass("active");
+        $('<li class="active" data-userId="' + userId + '"><a href="#">anonlike</a></li>').insertBefore($("ul.pagination.pagination-sm > li.right-arrow"))
+        var params = "userid="+userId
+        XHRPost("/api/chat/addChatWindow", params, function () {
+            if (this.status == 200) {
+                var res = JSON.parse(this.responseText);
+                console.log( res);
+                $("ul.pagination.pagination-sm > li[data-userid='" + userId + "']").attr("data-chatid", res._id);
+
+                $('div.msg_container_base').hide();
+                
+                var chatwindow = $('<div class="panel-body msg_container_base" data-chatid="' + res._id + '"><div class="row msg_container base_sent" ><div class="col-md-10 col-xs-10"><div class="messages msg_sent"><p>that mongodb thing looks good, huh?</p><time datetime="2009-11-13T20:00">Timothy • 51 min</time></div></div><div class="col-md-2 col-xs-2 avatar"><img src="" class="img-responsive"></div></div></div>');
+                $(".chat_window.chat-window>.panel").prepend(chatwindow);
+
+            }
+        });
+        
+    } else {
+        $("ul.pagination.pagination-sm > li").removeClass("active");
+        $("ul.pagination.pagination-sm > li[data-userid='" + userId + "']").addClass("active");
+        $('div.msg_container_base').hide();
+        console.log($("ul.pagination.pagination-sm > li[data-userid='" + userId + "']").attr("data-chatid"))
+        $('div[data-chatid='+ $("ul.pagination.pagination-sm > li[data-userid='" + userId + "']").attr("data-chatid")+"]").show();
+    }
+
+}
+
+
+
 function setZoomAnimation(mappy, zoomlevel){
     var currZoom = mappy.getZoom();
     if (currZoom > zoomlevel) {
@@ -648,6 +744,17 @@ function setZoomAnimation(mappy, zoomlevel){
 }
 
 $(function () {
+    
+    $("#sendChat").submit(function (e) {
+        e.preventDefault();
+        var msg = $(this).children(".input-group").children("input").val();
+        var chatid = $(".pagination.pagination-sm > .active").attr("data-chatid");
+        //Following function is located in javascripts/IndexSockets.js
+        sendMessage(chatid, user._id, msg);
+
+    }); 
+    
+
     XHRPost("/api/event/getFriendUpdates", "", function () {
 
         if (this.status == 200) {
@@ -689,8 +796,15 @@ $(function () {
                 if (res[i].type == "event")
                     placeLoc = 'at the <a class="location-link" data-type="' + res[i].type + '" data-locId="' + res[i].id + '" href="#">' + res[i].name + '</a> event in ' + res[i].location;
                 var obj = $('<div class="panel"><div class="panel-body activity-item"><a class="hoverUser" href="/profile/' + res[i].voter.username + '"  data-html="true" data-content="' + content + '"  rel="popover" data-original-title="' + res[i].voter.username + '" data-trigger="hover" data-userId="' + res[i].voter._id + '"> ' + res[i].voter.username + '</a> was <span class="' + res[i].mood + '">' + res[i].mood + '</span> ' + placeLoc + '.<br><strong>' + FriendlyDate(res[i].Date) + ' ago</strong></div></div>');
+                $("#collapseOne > .panel-body > .empty").remove();
                 $("#collapseOne > .panel-body").append(obj);
                 obj.children(".panel-body").children(".hoverUser").popover({ trigger: "hover" });
+                obj.children(".panel-body").children(".hoverUser").click(function(e){
+                    e.preventDefault();
+                    $('#collapseFive').collapse('show');
+                    $($(this).parent().parent().parent().parent()).collapse('hide');
+                    startChat($(this).attr('data-userid'), $(this).attr('data-original-title'));
+                });
                 obj.children(".panel-body").children(".location-link").click(function (e) {
                     e.preventDefault();
                     if ($(this).attr("data-type") == "event") {
@@ -737,6 +851,19 @@ $(function () {
         }
     });
     
+    XHRGet("/api/chat/getActiveChatWindows", function () {
+        
+        if (this.status == 200) {
+            var res = JSON.parse(this.responseText);
+            
+            for (var i in res) {
+                if (res[i].user1._id == user._id)
+                    startChat(res[i].user2._id, res[i].user2.username);
+                else
+                    startChat(res[i].user1._id, res[i].user1.username);
+            }
+        }
+    });
 
     $(".dropdown-toggle").dropdown();
 
@@ -748,7 +875,7 @@ $(function () {
         e.preventDefault();
         service = (service === undefined)? new google.maps.places.PlacesService(map) : service;
         var mapcenter = map.getCenter();
-        service.textSearch({ 'query': $(e.target[0]).val(), 'location': new google.maps.LatLng(mapcenter.lat(), mapcenter.lng()),"radius":40000 }, function (results, status) {
+        service.textSearch({ 'query': $(e.target[0]).val(), 'location': new google.maps.LatLng(mapcenter.lat(), mapcenter.lng()),"radius":40000 }, function (results, artatus) {
             if (status == google.maps.places.PlacesServiceStatus.OK) {
                 console.log(results[0]);
                 map.setCenter(results[0].geometry.location);
@@ -832,8 +959,8 @@ $(function () {
 function FriendlyDate(date1) {
     var seconds = Math.round((Date.now() - Date.parse(date1))/1000);
     var minutes = Math.round(seconds / 60);
-    var hours = Math.round(minutes / 60);
-    var days = Math.round(hours / 24);
+    var hours = Math.floor(minutes / 60);
+    var days = Math.floor(hours / 24);
     if (days == 1) return "A day";
     else if (days > 1) return days + " days";
     else if (hours == 1) return "An hour";

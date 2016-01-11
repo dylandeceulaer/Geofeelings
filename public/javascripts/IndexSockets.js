@@ -1,7 +1,10 @@
 ﻿var updateLocation;
+var sendMessage;
 $(function () {
     var hostname = window.location.protocol + "//" + window.location.host;
     var socket = io.connect(hostname);
+    
+    
 
     socket.on('message', function (message) {
     });
@@ -9,6 +12,20 @@ $(function () {
     updateLocation = function (id,loc){
         socket.emit("updateLocation",id,loc);
     }
+    
+    sendMessage = function (chatId, userId, message){
+        socket.emit("sendMessage", chatId, userId, message)
+    }
+    
+    socket.on("MessageSuccess", function (receiver, chatId,message) {
+        $("#btn-input").val("");
+            $("ul.pagination.pagination-sm > li").removeClass("active");
+            $("ul.pagination.pagination-sm > li[data-userid='" + receiver + "']").addClass("active");
+            $('div.msg_container_base').hide();
+            $('div[data-chatid=' + chatId + "]").show();
+        
+            $('div[data-chatid=' + chatId + "]").append('<div class="row msg_container base_receive"><div class="col-md-10 col-xs-10"><div class="messages msg_receive"><p>'+message+'</p><time datetime="2009-11-13T20:00">Timothy • 51 min</time></div></div><div class="col-md-2 col-xs-2 avatar"><img src="http://www.bitrebels.com/wp-content/uploads/2011/02/Original-Facebook-Geek-Profile-Avatar-1.jpg" class="img-responsive"></div></div>')
+    });
 
     socket.on("Update", function (update) {
 
@@ -114,6 +131,7 @@ $(function () {
         if (update.type == "event")
             placeLoc = 'at the <a class="location-link" data-type="' + update.type + '" data-locId="' + update._id + '" href="#">' + update.name + '</a> event in ' + update.location;
         var obj = $('<div class="panel"><div class="panel-body activity-item"><a class="hoverUser" href="/profile/' + update.voter.username + '"  data-html="true" data-content="' + content + '"  rel="popover" data-original-title="' + update.voter.username + '" data-trigger="hover" data-userId="' + update.voter._id + '"> ' + update.voter.username + '</a> was <span class="' + update.votes[update.votes.length - 1].mood + '">' + update.votes[update.votes.length - 1].mood + '</span> ' + placeLoc + '.<br><strong>' + FriendlyDate(update.votes[update.votes.length - 1].Date) + ' ago</strong></div></div>');
+        $("#collapseTwo > .panel-body > .empty").remove();
         $("#collapseTwo > .panel-body").prepend(obj);
         obj.children(".panel-body").children(".hoverUser").popover({ trigger: "hover" });
         obj.children(".panel-body").children(".location-link").click(function (e) {
@@ -262,6 +280,7 @@ $(function () {
         if (update.type == "event")
             placeLoc = 'at the <a class="location-link" data-type="' + update.type + '" data-locId="' + update._id + '" href="#">' + update.name + '</a> event in ' + update.location;
         var obj = $('<div class="panel"><div class="panel-body activity-item"><a class="hoverUser" href="/profile/' + update.voter.username + '"  data-html="true" data-content="' + content + '"  rel="popover" data-original-title="' + update.voter.username + '" data-trigger="hover" data-userId="' + update.voter._id + '"> ' + update.voter.username + '</a> was <span class="' + update.votes[update.votes.length - 1].mood + '">' + update.votes[update.votes.length - 1].mood + '</span> ' + placeLoc + '.<br><strong>' + FriendlyDate(update.votes[update.votes.length - 1].Date) + ' ago</strong></div></div>');
+        $("#collapseOne > .panel-body > .empty").remove();
         $("#collapseOne > .panel-body").prepend(obj);
         obj.children(".panel-body").children(".hoverUser").popover({ trigger: "hover" });
         obj.children(".panel-body").children(".location-link").click(function (e) {

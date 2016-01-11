@@ -184,6 +184,29 @@ router.post('/deleteEvent', function (req, res) {
     }
 });
 
+router.post('/deleteMoodCirle', function (req, res) {
+    if (!req.user.role.name || req.user.role.name == "User") {
+        res.status(401);
+        res.send("You need to be administrator.");
+    } else {
+        MoodCircleRepo.deleteMoodCircle(req.body.id, function (err , result) {
+            if (err) {
+                if (err == "No records found") {
+                    res.status(204);
+                    res.send('Nothing Found');
+                } else {
+                    res.status(500);
+                    res.send('Internal server Error');
+                    console.log(err);
+                }
+            }
+            else {
+                res.status(200);
+                res.send('ok');
+            }
+        });
+    }
+});
 function parseLatLng(val){
     val = val.replace("(", "");
     val = val.replace(")", "");
@@ -303,37 +326,6 @@ router.post('/addMoodCircle', function (req, res) {
     }
 });
 
-router.post('/deleteComment', function (req, res) {
-    if (!req.user) {
-        res.status(401);
-        res.send("you need to be logged in to delete a comment.");
-    } else {
-        CommentRepo.getById(req.body.id, function (err, comment) {
-            console.log("user: "+req.user._id+" comm "+comment[0].owner._id)
-            if (err) {
-                res.status(500);
-            }
-            
-            else if (comment[0].owner.username == req.user.username) {
-                CommentRepo.deleteComment(req.body.id, function (err) {
-                    if (err) {
-                        res.status(500);
-                        res.send("Server error");
-                    }
-                    else {
-                        res.status(200);
-                        res.send("Comment deleted");
-                    }
-                });
-            } else {
-                res.status(401);
-                res.send("Unauthorized");
-            }
-        });
-            
-        }
-    
-});
 
 
 module.exports = router;

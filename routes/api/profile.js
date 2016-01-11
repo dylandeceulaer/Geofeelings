@@ -23,24 +23,6 @@ router.get('/', function (req, res) {
 });
 
 
-//router.get('/byemail/:email?', function (req, res) {
-//    UsersRepo.findUserByEmail(req.params.email, function (err , result) {
-//        if (err) {
-//            res.status(500);
-//            res.send('Internal server Error');
-//        }
-//        if (result.length > 0) {
-//            res.status(200);
-//            res.send('Found');
-//        }
-//        else {
-//            res.status(204);
-//            res.send('Nothing Found');
-                
-//        }
-//    });
-//});
-
 router.post('/putComment', function (req, res) {
     if (!req.user) {
         res.status(401);
