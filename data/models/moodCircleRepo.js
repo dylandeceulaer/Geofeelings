@@ -131,7 +131,8 @@ MoodCircleRepo = (function () {
         getById: getById,
         getMoodCirclesInScope: getMoodCirclesInScope,
         getUserUpdates: getUserUpdates,
-        getFriendUpdates: getFriendUpdates
+        getFriendUpdates: getFriendUpdates,
+        deleteMoodCircle: deleteMoodCircle
     };
 })();
 

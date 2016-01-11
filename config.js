@@ -8,7 +8,7 @@
 var config = {
     HOST: 'http://localhost',
     PORT: getEnv('PORT') || 80,
-    MONGODBURL : process.env.MONGO_URI || 'mongodb://localhost/GeoMood',
+    MONGODBURL : process.env.MONGO_URI || 'mongodb://localhost/GeoMoodTest',
 };
 
 function getEnv(variable) {
