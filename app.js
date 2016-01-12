@@ -10,7 +10,6 @@ var LocalStrategy = require('passport-local').Strategy;
 
 
 var routes = require('./routes/index');
-var users = require('./routes/users');
 var profile = require('./routes/profile');
 var apiUsers = require('./routes/api/users');
 var apiProfile = require('./routes/api/profile');
@@ -19,12 +18,9 @@ var apiChat = require('./routes/api/chat');
 
 var app = express();
 
-// view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -40,7 +36,6 @@ app.use(passport.session());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
-app.use('/users', users);
 app.use('/api/users', apiUsers);
 app.use('/api/profile', apiProfile);
 app.use('/api/event', apiEvent);

@@ -33,13 +33,20 @@ module.exports = function (io , mongoose) {
             }
         }
     });
-    routerChat.emitter.on("sendMessageToReceiver", function (sender, receiver, chatId, message) {
+    routerChat.emitter.on("sendMessageToReceiver", function (chat, sender) {
+        var receiver;
+        if (chat.user1._id == sender)
+            receiver = chat.user2._id;
+        else
+            receiver = chat.user1._id
+
+        console.log("chat",chat)
         for (var i = 0; i < ActiveSockets.length; i++) {
             if (ActiveSockets[i].UserId == sender) {
-                io.sockets.connected[ActiveSockets[i].id].emit("MessageSuccess", receiver, chatId, message)
+                io.sockets.connected[ActiveSockets[i].id].emit("MessageSuccess", chat)
             }
             if (ActiveSockets[i].UserId == receiver) {
-                io.sockets.connected[ActiveSockets[i].id].emit("NewMessage", sender,chatId,message)
+                io.sockets.connected[ActiveSockets[i].id].emit("NewMessage",chat)
             }
         }
     })

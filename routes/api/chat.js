@@ -1,19 +1,20 @@
-﻿
-var express = require('express');
+﻿var express = require('express');
 var router = express.Router();
 var ChatRepo = require("../../data/models/chatRepo");
-var Chat = require("../../data/models/chat");
 router.emitter = new (require('events').EventEmitter)();
 
 
 router.emitter.on("sendMessage", function (chatid, userId, message) {
     ChatRepo.addMessage(chatid, userId, message, function (err, res) {
         if (!err) {
+            ChatRepo.getChatById(chatid, function (err, res) {
+                if (!err) {
+                    router.emitter.emit("sendMessageToReceiver", res, userId);
+                } else {
+                    console.log(err);
+                }
+            });
            
-            var receiver;
-            if (res.user1 == userId) receiver = res.user2;
-            else receiver = res.user1
-            router.emitter.emit("sendMessageToReceiver", userId, receiver, chatid, message);
         } else {
             console.log(err);
         }
@@ -39,24 +40,6 @@ router.get('/getActiveChatWindows', function (req, res) {
     }
 });
 
-router.post('/getChatById2', function (req, res) {
-    if (!req.user) {
-        res.status(401);
-        res.send("you need to be logged in.");
-    } else {
-        ChatRepo.getActiveChatWindows(req.body.id, function (err , result) {
-            if (err) {
-                res.status(204);
-                res.send('Nothing Found');
-                console.log(err);
-            }
-            else {
-                res.status(200);
-                res.json(result);
-            }
-        });
-    }
-});
 
 router.post('/getChatById', function (req, res) {
     if (!req.user) {

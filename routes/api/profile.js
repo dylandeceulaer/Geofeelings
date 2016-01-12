@@ -22,7 +22,6 @@ router.get('/', function (req, res) {
     });
 });
 
-
 router.post('/putComment', function (req, res) {
     if (!req.user) {
         res.status(401);

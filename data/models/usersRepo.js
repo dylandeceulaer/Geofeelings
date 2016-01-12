@@ -42,11 +42,16 @@ UsersRepo = (function () {
                 
             });
         },
+
         findUser = function (username,currentUserId, next) {
             User.find({ username: username }).populate('friends').populate('role').populate('friends.user').exec(function (err, res) {
                 if (err) {
                     console.log(err);
                     next(err);
+                } else if (res.length<1) {
+                    console.log("nothing found");
+                    next("nothing found");
+
                 } else {
                     isFriend(res[0]._id, currentUserId, function (result) {
                         res[0].isFriend = result;
@@ -84,7 +89,18 @@ UsersRepo = (function () {
             User.find({ email: email }, function (err, res) {
                 next(err, res);
             });
-},
+        },
+        setAvailabilityState = function (id, state, next) {
+            User.update({ _id: id }, { Available: state }, function (error, result) {
+                if (error) {
+                    console.log(error);
+                    return next(error, null);
+                }
+                else {
+                    return next(null, result);
+                }
+            });
+        },
         addFriend = function (User1Id, User2Id,next){
             User.findOne({ _id: User1Id }, function (err, res) {
                 if (!err) {
@@ -166,42 +182,14 @@ UsersRepo = (function () {
                     
             });
         },
-            
-            //User.findOne({ _id: User1Id, "friends.user" : User2Id }, function (err, res) {
-            //    if (!err) {
-            //        res.isAccepted = true;
-            //        res.save(function () {
-            //            if (!err) {
-            //                User.findOne({ _id: User2Id, "friends.user" : User1Id }, function (err, res) {
-            //                    if (!err) {
-            //                        res.isAccepted = true;
-            //                        res.save(function () {
-            //                            if (!err) {
-            //                                return next(null, res);
-            //                            } else {
-            //                                console.error(err);
-            //                                return next("something went wrong");
-            //                            }
-            //                        });
-            //                    } else {
-            //                        console.error(err);
-            //                        return next("something went wrong");
-            //                    }
-            //                });
-            //            } else {
-            //                console.error(err);
-            //                return next("something went wrong");
-            //            }
-            //        });
-            //    } else {
-            //        console.error(err);
-            //        return next("something went wrong");
-            //    }
-            //});
-        
-    
         setDefaultValues = function (role){
             User.register(new User({ username : "docent@nmct", name : "Admin Account", email : "admin@howest.be", role: RoleRepo.ROLES.Admin.id }), "docent1@nmct", function (err, account) {
+            })
+            User.register(new User({ username : "Mike", name : "Mike Abram", email : "Mike@howest.be", role: RoleRepo.ROLES.User.id }), "testPass", function (err, account) {
+            })
+            User.register(new User({ username : "Steve", name : "Steve Smith", email : "Steve@howest.be", role: RoleRepo.ROLES.User.id }), "testPass", function (err, account) {
+            })
+            User.register(new User({ username : "James", name : "James Jones", email : "James@howest.be", role: RoleRepo.ROLES.User.id }), "testPass", function (err, account) {
             })
         }
 
@@ -216,7 +204,8 @@ UsersRepo = (function () {
         acceptFriendshipRequest: acceptFriendshipRequest,
         blockFriendship: blockFriendship,
         findUserCheck : findUserCheck,
-        setDefaultValues : setDefaultValues
+        setDefaultValues : setDefaultValues,
+        setAvailabilityState: setAvailabilityState
     };
 })();
 

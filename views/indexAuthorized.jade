@@ -25,8 +25,8 @@ append scripts
 
 block content
     .PageFiller#wrapper
-        #StatusOverlay How are you feeling?
-            br
+        #StatusOverlay 
+            h3 How are you feeling?
             img(src="/images/HappyPin.png")
             img(src="/images/UnhappyPin.png")
         #googlemap
@@ -47,7 +47,7 @@ block content
                         h4.panel-title
                             a(role="button" )
                                 ='Friend Activity'
-                    #collapseOne.panel-collapse.collapse(role="tabpanel" aria-labelledby="headingOne")
+                    #collapseOne.panel-collapse.collapse.in(role="tabpanel" aria-labelledby="headingOne")
                         .panel-body
                             .empty
                                 i Nothing new to report.
@@ -74,36 +74,23 @@ block content
                         h4.panel-title
                             a(role="button")
                                 ='Chat'
-                    #collapseFive.panel-collapse.collapse.in(role="tabpanel" aria-labelledby="headingFive")
+                    #collapseFive.panel-collapse.collapse(role="tabpanel" aria-labelledby="headingFive")
                         .panel-body
                             div.damnlineheight
                                 ul.pagination.pagination-sm
                                     li.disabled
                                         a(href="#") &laquo;
-                                    li.active
-                                        a(href="#") anonlike
-                                    li
-                                        a(href="#") ikkedylandus
 
                                     li.disabled.right-arrow
                                         a(href="#") &raquo;
                             .chat_window.chat-window(data-sender)
                                 .panel.panel-default
                                     .panel-body.msg_container_base
-                                        .row.msg_container.base_sent
-                                            .col-md-10.col-xs-10
-                                                .messages.msg_sent
-                                                    p that mongodb thing looks good, huh?
-                                                    time(datetime='2009-11-13T20:00') Timothy &bull; 51 min
-                                            .col-md-2.col-xs-2.avatar
-                                                img.img-responsive(src='http://www.bitrebels.com/wp-content/uploads/2011/02/Original-Facebook-Geek-Profile-Avatar-1.jpg')
-                                        
-                                    .panel-footer
-                                        form#sendChat
-                                            .input-group
-                                                input#btn-input.form-control.input-sm.chat_input(type='text', placeholder='Write your message here...')
-                                                span.input-group-btn
-                                                    button#btn-chat.btn.btn-primary.btn-sm Send
+                                    form#sendChat
+                                        .input-group
+                                            input#btn-input.form-control.input-sm.chat_input(type='text', placeholder='Write your message here...')
+                                            span.input-group-btn
+                                                button#btn-chat.btn.btn-primary.btn-sm(disabled) Send
                             
                 if(user.role && user.role.name == "Administrator")
                     .panel.panel-primary
@@ -114,7 +101,4 @@ block content
                         #collapseFour.panel-collapse.collapse(role="tabpanel" aria-labelledby="headingFour")
                             .panel-body#AdminEventsBody
                                 button.btn.btn-primary.col-xs-12#addEvent Add Event
-        
-    .container
-        p(id="about") Welcome to #{title}
-        +alert-info("This is a sample info alert.")
+       

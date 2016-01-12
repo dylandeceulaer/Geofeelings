@@ -17,16 +17,57 @@ $(function () {
         socket.emit("sendMessage", chatId, userId, message)
     }
     
-    socket.on("MessageSuccess", function (receiver, chatId,message) {
+    socket.on("MessageSuccess", function (chat) {
+        console.log(chat)
+        var receiver;
+        if (chat.user1._id == user._id)
+            receiver = chat.user2;
+        else
+            receiver = chat.user1;
+
         $("#btn-input").val("");
             $("ul.pagination.pagination-sm > li").removeClass("active");
-            $("ul.pagination.pagination-sm > li[data-userid='" + receiver + "']").addClass("active");
+            $("ul.pagination.pagination-sm > li[data-userid='" + receiver._id + "']").addClass("active");
             $('div.msg_container_base').hide();
-            $('div[data-chatid=' + chatId + "]").show();
+        $('div[data-chatid=' + chat._id + "]").show();
         
-            $('div[data-chatid=' + chatId + "]").append('<div class="row msg_container base_receive"><div class="col-md-10 col-xs-10"><div class="messages msg_receive"><p>'+message+'</p><time datetime="2009-11-13T20:00">Timothy • 51 min</time></div></div><div class="col-md-2 col-xs-2 avatar"><img src="http://www.bitrebels.com/wp-content/uploads/2011/02/Original-Facebook-Geek-Profile-Avatar-1.jpg" class="img-responsive"></div></div>')
+        var image = "/images/NoPic.jpg";
+        if (user.image)
+            image = "/userimages/"+user.image
+        
+        $('div[data-chatid=' + chat._id + "]").append('<div class="row msg_container base_receive"><div class="col-md-2 col-xs-2 avatar"><a href="/profile"><img src="'+ image+'" class="img-responsive"></a></div><div class="col-md-10 col-xs-10"><div class="messages msg_receive"><p>'+chat.messages[chat.messages.length-1].message+'</p><time> You • '+ FriendlyDate(chat.messages[chat.messages.length - 1].date)+' ago</time></div></div></div>')
+        $('div[data-chatid=' + chat._id + "]").get(0).scrollTop = $('div[data-chatid=' + chat._id + "]").get(0).scrollHeight;
+            
     });
-
+    socket.on("NewMessage", function (chat) {
+        
+        var sender;
+        if (chat.user1._id == user._id)
+            sender = chat.user2;
+        else
+            sender = chat.user1;
+        startChat(sender._id, sender.username, function (isCreated) {
+            if (!isCreated) {
+                if($("#headingFive").hasClass("collapsed"))
+                    $("#headingFive").addClass("newMessage");
+                console.log($('li[data-chatid=' + chat._id + "]"));
+                if(!$('li[data-chatid=' + chat._id + "]").hasClass("active")) {
+                    $('li[data-chatid=' + chat._id + "] > a").addClass("newMessage");
+                }
+                var image = "/images/NoPic.jpg";
+                if (sender.image)
+                    image = "/userimages/" + sender.image
+                
+                $('div[data-chatid=' + chat._id + "]").append('<div class="row msg_container base_sent"><div class="col-md-10 col-xs-10"><div class="messages base_sent"><p>' + chat.messages[chat.messages.length - 1].message + '</p><time><a href="/profile/' + sender.username + '">' + sender.username + '</a> • ' + FriendlyDate(chat.messages[chat.messages.length - 1].date) + ' ago</time></div></div><div class="col-md-2 col-xs-2 avatar"><a href="/profile/'+ sender.username+'"><img src="' + image + '" class="img-responsive"></a></div></div>')
+                
+                console.log($('div[data-chatid=' + chat._id + "]"));
+                $('div[data-chatid=' + chat._id + "]").get(0).scrollTop = $('div[data-chatid=' + chat._id + "]").get(0).scrollHeight;
+            } else {
+                $('#accordion > .panel > .panel-collapse').collapse('hide');
+                $('#collapseFive').collapse('show');
+            }
+        })
+    });
     socket.on("Update", function (update) {
 
         if (user._id == update.votes[update.votes.length - 1].voter || socketAdditions.indexOf(update.votes[update.votes.length - 1]._id) >= 0) {
@@ -125,7 +166,13 @@ $(function () {
         if (update.voter.location)
             loc = update.voter.location;
         var img = "<div class='img-circle profile-item-image' " + src + " ' ></div>";
-        var content = "<div class='col-xs-6'>" + img + "</div><div class='col-xs-6'>" + update.voter.name + "<br>" + loc + "</div>"
+        var WantsToChat;
+        if (update.voter.Available)
+            WantsToChat = "Wants to chat!";
+        else
+             WantsToChat = "Doesn't want to chat";
+        
+        var content = "<div class='col-xs-6'>" + img + "</div><div class='col-xs-6'>" + update.voter.name + "<br><strong>" + WantsToChat + "</strong><br>" + loc + "</div>"
         if (update.type == "moodCircle")
             placeLoc = 'around <a class="location-link" data-type="' + update.type + '" data-locId="' + update._id + '" href="#">' + update.name + '</a>';
         if (update.type == "event")
@@ -134,6 +181,14 @@ $(function () {
         $("#collapseTwo > .panel-body > .empty").remove();
         $("#collapseTwo > .panel-body").prepend(obj);
         obj.children(".panel-body").children(".hoverUser").popover({ trigger: "hover" });
+        if (update.voter.Available) {
+            obj.children(".panel-body").children(".hoverUser").click(function (e) {
+                e.preventDefault();
+                $('#collapseFive').collapse('show');
+                $($(this).parent().parent().parent().parent()).collapse('hide');
+                startChat($(this).attr('data-userid'), $(this).attr('data-original-title'));
+            });
+        }
         obj.children(".panel-body").children(".location-link").click(function (e) {
             e.preventDefault();
             if ($(this).attr("data-type") == "event") {
@@ -274,7 +329,13 @@ $(function () {
         if (update.voter.location)
             loc = update.voter.location;
         var img = "<div class='img-circle profile-item-image' " + src + " ' ></div>";
-        var content = "<div class='col-xs-6'>" + img + "</div><div class='col-xs-6'>" + update.voter.name + "<br>" + loc + "</div>"
+        var WantsToChat;
+        if (update.voter.Available)
+            WantsToChat = "Wants to chat!";
+        else
+            WantsToChat = "Doesn't want to chat";
+        
+        var content = "<div class='col-xs-6'>" + img + "</div><div class='col-xs-6'>" + update.voter.name + "<br><strong>" + WantsToChat + "</strong><br>" + loc + "</div>"
         if (update.type == "moodCircle")
             placeLoc = 'around <a class="location-link" data-type="' + update.type + '" data-locId="' + update._id + '" href="#">' + update.name + '</a>';
         if (update.type == "event")
@@ -283,6 +344,14 @@ $(function () {
         $("#collapseOne > .panel-body > .empty").remove();
         $("#collapseOne > .panel-body").prepend(obj);
         obj.children(".panel-body").children(".hoverUser").popover({ trigger: "hover" });
+        if (update.voter.Available) {
+            obj.children(".panel-body").children(".hoverUser").click(function (e) {
+                e.preventDefault();
+                $('#collapseFive').collapse('show');
+                $($(this).parent().parent().parent().parent()).collapse('hide');
+                startChat($(this).attr('data-userid'), $(this).attr('data-original-title'));
+            });
+        }
         obj.children(".panel-body").children(".location-link").click(function (e) {
             e.preventDefault();
             if ($(this).attr("data-type") == "event") {

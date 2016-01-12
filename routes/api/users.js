@@ -1,9 +1,4 @@
-﻿/*
- * users.js
- * API controller voor users 
- * namespace : /api/users
- */
-var express = require('express');
+﻿var express = require('express');
 var router = express.Router();
 var UsersRepo = require("../../data/models/usersRepo");
 var passport = require('passport');
@@ -102,13 +97,31 @@ router.post('/update', function (req, res) {
         });
     }
 });
+
+router.post('/setAvailabilityState', function (req, res) {
+    if (!req.user) {
+        res.status(401);
+        res.send("you need to be logged in");
+    } else {
+        var state = req.body.state;
+        UsersRepo.setAvailabilityState(req.user._id, state, function (err , result) {
+            if (err) {
+                console.error(err);
+                res.status(500);
+            } else {
+                res.status(200);
+                res.send("success");
+            }
+        });
+    }
+});
+
 router.post('/acceptFriendship', function (req, res) {
     if (!req.user) {
         res.status(401);
         res.send("you need to be logged in to post a comment.");
     } else {
         var id = req.body.id;
-        console.log("test");
         UsersRepo.acceptFriendshipRequest(req.user._id, id, function (err , result) {
             if (err) {
                 console.error(err);

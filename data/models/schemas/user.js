@@ -48,6 +48,7 @@ var UserSchema = new mongoose.Schema( {
         ref: 'Role', 
         required: true
     },
+    Available: {type: Boolean, 'default':true},
     createdOn: { type: Date, 'default': Date.now },
     lastLogin: Date
 });

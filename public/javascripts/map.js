@@ -1,8 +1,4 @@
-﻿//TODO: ZO EEN CHATTERKE ZO
-//TODO: EVENTS
-
-
-var map;
+﻿var map;
 var service;
 var circles = [];
 var overlay;
@@ -28,7 +24,9 @@ function XHRGet(url, cb) {
     oReq.open("get", url, true);
     oReq.send();
 }
-
+function updateTitle(obj) {
+    $(obj).parent().parent().parent().children(".panel-heading").children("h4").children("a").text($(obj).parent().children(".input-name").val() + ", " + $(obj).parent().children(".input-location").val());
+}
 
 
 function addEvent(res) {
@@ -130,9 +128,7 @@ function addEvent(res) {
             });
                         
         });
-        function updateTitle(obj) {
-            $(obj).parent().parent().parent().children(".panel-heading").children("h4").children("a").text($(obj).parent().children(".input-name").val() + ", " + $(obj).parent().children(".input-location").val());
-        }
+       
     }
     
     $("#collapseThree > .panel-body > .empty").remove();
@@ -144,7 +140,10 @@ function addEvent(res) {
         color = "#2cabff";
     
     var thisvotes = rectangle.votes;
-    thisvotes.splice(0, thisvotes.length-3);
+    thisvotes.splice(0, thisvotes.length - 3);
+    thisvotes.sort(function (a, b) {
+        return (Date.parse(b.Date) - Date.parse(a.Date));
+    });
     var votesdiv = "";
     for (var v in thisvotes) {
         var loc = "";
@@ -154,12 +153,30 @@ function addEvent(res) {
         if (thisvotes[v].voter.location)
             loc = thisvotes[v].voter.location;
         var img = "<div class='img-circle profile-item-image' " + src + " ' ></div>";
-        var content = "<div class='col-xs-6'>" + img + "</div><div class='col-xs-6'>" + thisvotes[v].voter.name + "<br>" + loc + "</div>"
+        var WantsToChat
+        if (thisvotes[v].voter.Available)
+            WantsToChat = "Wants to chat!";
+        else
+            WantsToChat = "Doesn't want to chat";
+        
+        var content = "<div class='col-xs-6'>" + img + "</div><div class='col-xs-6'>" + thisvotes[v].voter.name + "<br><strong>" + WantsToChat + "</strong><br>" + loc + "</div>"
         votesdiv = votesdiv + '<br><a class="hoverUser" href="/profile/' + thisvotes[v].voter.username + '"  data-html="true" data-content="' + content + '"  rel="popover" data-original-title="' + thisvotes[v].voter.username + '" data-trigger="hover" data-userId="' + thisvotes[v].voter._id + '"> ' + thisvotes[v].voter.username + '</a> was <span class="' + thisvotes[v].mood + '">' + thisvotes[v].mood + '</span> - <strong>' + FriendlyDate(thisvotes[v].Date) + ' ago</strong>';
     }
     var obj = $('<div class="panel panel-default"><div class="panel-heading" style="background-color:' + color + '"><h4 class="panel-title" >' + rectangle.name + ', ' + rectangle.location + '</h4></div><div class="panel-body" id="' + res._id + '"><strong>Latest votes:</strong>'+ votesdiv+'<button class="event-button locate-event btn btn-default">Locate</button></div></div>');
     var object = $("#collapseThree > .panel-body").append(obj);
     var elements = obj.children(".panel-body");
+
+    obj.children(".panel-body").children(".hoverUser").popover({ trigger: "hover" });
+    if (thisvotes[v].voter.Available) {
+        obj.children(".panel-body").children(".hoverUser").click(function (e) {
+            e.preventDefault();
+            if ($(this).attr('data-userid') != user._id) {
+                $('#collapseFive').collapse('show');
+                $($(this).parent().parent().parent().parent()).collapse('hide');
+                startChat($(this).attr('data-userid'), $(this).attr('data-original-title'));
+            }
+        });
+    }
     elements.children(".locate-event").click(function (e) {
         map.setCenter(rectangle.center);
         map.setZoom(16);
@@ -189,20 +206,7 @@ function addMoodCircle(res) {
     moodCircle.addListener('click', function (e) {
         map.setCenter(this.center);
         map.setZoom(18);
-        if (infowindow) {
-            infowindow.close();
-        }
-        var votes = "";
-        for (var vote in this.votes) {
-            votes = votes + "<div class='panel'><div class='panel-body'>" + this.votes[vote].voter.username + "</div></div>";
-        }
-        var contentString = '<div class="panel-heading">' + this.name + '</div><div class="info-content">' + votes + '</div>';
         
-        infowindow = new google.maps.InfoWindow({
-            content: contentString,
-            position: this.center,
-            map: map
-        });
     });
     moodCircle.voteBalance = 0;
     if (moodCircle.votes) {
@@ -224,7 +228,7 @@ function addMoodCircle(res) {
             fillColor: '#2cabff',
         });
     }
-    if (moodCircle.voteBalance == 0) {
+    if (moodCircle.voteBalance === 0) {
         if (moodCircle.votes[moodCircle.votes.length - 1].mood == "happy") {
             moodCircle.setOptions({
                 fillColor: '#fff200'
@@ -239,9 +243,9 @@ function addMoodCircle(res) {
     var multiplier = moodCircle.voteBalance;
     if (moodCircle.voteBalance < 0)
         multiplier = multiplier * (-1);
-    if (multiplier != 0)
+    if (multiplier !== 0)
         moodCircle.setRadius(30 + (20 * multiplier) - 20)
-    if (multiplier == 0)
+    if (multiplier === 0)
         moodCircle.setRadius(30 + (20 * multiplier))
     
     if (moodCircle.votes)
@@ -372,7 +376,13 @@ function initMap() {
                         if (votes[ii].voter.location)
                             loc = votes[ii].voter.location;
                         var img = "<div class='img-circle profile-item-image' " + src + " ' ></div>";
-                        var content = "<div class='col-xs-6'>" + img + "</div><div class='col-xs-6'>" + votes[ii].voter.name + "<br>" + loc + "</div>"
+                        var WantsToChat
+                        if (votes[ii].voter.Available)
+                            WantsToChat = "Wants to chat!";
+                        else
+                            WantsToChat = "Doesn't want to chat";
+                        
+                        var content = "<div class='col-xs-6'>" + img + "</div><div class='col-xs-6'>" + votes[ii].voter.name + "<br><strong>" + WantsToChat + "</strong><br>" + loc + "</div>"
                         if (votes[ii].type == "moodCircle")
                             placeLoc = 'around <a class="location-link" data-type="' + votes[ii].type + '" data-locId="' + votes[ii].id + '" href="#">' + votes[ii].name + '</a>';
                         if (votes[ii].type == "event")
@@ -381,6 +391,16 @@ function initMap() {
                         $("#collapseTwo > .panel-body > .empty").remove();
                         $("#collapseTwo > .panel-body").append(obj);
                         obj.children(".panel-body").children(".hoverUser").popover({ trigger: "hover" });
+                        if (votes[ii].voter.Available) {
+                            obj.children(".panel-body").children(".hoverUser").click(function (e) {
+                                e.preventDefault();
+                                if ($(this).attr('data-userid') != user._id) {
+                                    $('#collapseFive').collapse('show');
+                                    $($(this).parent().parent().parent().parent()).collapse('hide');
+                                    startChat($(this).attr('data-userid'), $(this).attr('data-original-title'));
+                                }
+                            });
+                        }
                         obj.children(".panel-body").children(".location-link").click(function (e) {
                             e.preventDefault();
                             if ($(this).attr("data-type") == "event") {
@@ -469,7 +489,7 @@ function handleLocationError(browserHasGeolocation, infoWindow, pos) {
 
 
 function initMapDependencies() {
-    //source: http://stackoverflow.com/questions/17191664/why-getprojection-is-not-working-in-v3
+    //source for draggable pin on map: http://stackoverflow.com/questions/17191664/why-getprojection-is-not-working-in-v3
 
     $("#StatusOverlay img").draggable({
         containment : [0, 80, $(map.getDiv()).width()-50, $(map.getDiv()).height()+25],
@@ -501,41 +521,51 @@ function initMapDependencies() {
                 
                 if (google.maps.geometry.poly.containsLocation(ll, events[val])) {
                     var event = events[val];
-               
 
                     isWithinEvent = true;
-                    params = "id=" + events[val].id + "&vote=" + mood;
-                    XHRPost("/api/event/addVoteEvent", params, function () {
-                        if (this.status == 200) {
-                            if (event.votes.length)
-                                event.votes = [];
-                            event.votes.push({ voter: user, vote: mood });
-                            if (mood == "happy")
-                                event.voteBalance++;
-                            if (mood == "unhappy")
-                                event.voteBalance--;
-                            if (event.voteBalance > 0) {
-                                event.setOptions({
-                                    fillColor: '#fff200',
-                                    strokeColor: '#fff200'
-                                });
+                    hasVotedYet = false;
+                    for (var vote in event.votes) {
+                        console.log("a: ", event.votes[vote].voter._id, "b:", user._id)
+                        if (event.votes[vote].voter._id == user._id)
+                            hasVotedYet = true;
+                    }
+                    
+                    if (!hasVotedYet) {
+                        params = "id=" + events[val].id + "&vote=" + mood;
+                        XHRPost("/api/event/addVoteEvent", params, function () {
+                            if (this.status == 200) {
+                                if (!event.votes)
+                                    event.votes = [];
+                                event.votes.push({ voter: user, vote: mood });
+                                if (mood == "happy")
+                                    event.voteBalance++;
+                                if (mood == "unhappy")
+                                    event.voteBalance--;
+                                if (event.voteBalance > 0) {
+                                    event.setOptions({
+                                        fillColor: '#fff200',
+                                        strokeColor: '#fff200'
+                                    });
+                                }
+                                if (event.voteBalance < 0) {
+                                    event.setOptions({
+                                        fillColor: '#2cabff',
+                                        strokeColor: '#2cabff'
+                                    });
+                                }
+                                if (event.voteBalance === 0) {
+                                    event.setOptions({
+                                        fillColor: '#f00',
+                                        strokeColor: '#f00'
+                                    });
+                                }
+                            } else {
+                                console.error("error");
                             }
-                            if (event.voteBalance < 0) {
-                                event.setOptions({
-                                    fillColor: '#2cabff',
-                                    strokeColor: '#2cabff'
-                                });
-                            }
-                            if (event.voteBalance == 0) {
-                                event.setOptions({
-                                    fillColor: '#f00',
-                                    strokeColor: '#f00'
-                                });
-                            }
-                        } else {
-                            console.error("error");
-                        }
-                    });
+                        });
+                    } else {
+                        console.log("already voted");
+                    }
                     
                 }
             }
@@ -545,60 +575,69 @@ function initMapDependencies() {
             if (!isWithinEvent) {
                 for (var val in circles) {
                     if (google.maps.geometry.spherical.computeDistanceBetween(circles[val].getCenter(), ll) <= circles[val].getRadius()) {
+
                         exists = true;
                         var currCircle = circles[val];
-                        params = "id=" + circles[val].id + "&vote=" + mood;
-                        XHRPost("/api/event/addVoteMoodCircle", params, function () {
-                            if (this.status == 200) {
-                                if (!currCircle.votes)
-                                    currCircle.votes = [];
-                                currCircle.votes.push({ voter: user, mood: mood });
-                                currCircle.voteBalance = 0;
-                                if (currCircle.votes) {
-                                    for (var i in currCircle.votes) {
-                                        if (currCircle.votes[i].mood == "happy")
-                                            currCircle.voteBalance++;
-                                        if (currCircle.votes[i].mood == "unhappy")
-                                            currCircle.voteBalance--;
+                        
+                        hasVotedYet = false;
+                        for (var vote in currCircle.votes) {
+                            if (currCircle.votes[vote].voter._id == user._id)
+                                hasVotedYet = true;
+                        }
+                        if (!hasVotedYet) {
+                            params = "id=" + circles[val].id + "&vote=" + mood;
+                            XHRPost("/api/event/addVoteMoodCircle", params, function () {
+                                if (this.status == 200) {
+                                    if (!currCircle.votes)
+                                        currCircle.votes = [];
+                                    currCircle.votes.push({ voter: user, mood: mood });
+                                    currCircle.voteBalance = 0;
+                                    if (currCircle.votes) {
+                                        for (var i in currCircle.votes) {
+                                            if (currCircle.votes[i].mood == "happy")
+                                                currCircle.voteBalance++;
+                                            if (currCircle.votes[i].mood == "unhappy")
+                                                currCircle.voteBalance--;
+                                        }
                                     }
-                                }
-                                if (currCircle.voteBalance > 0) {
-                                    currCircle.setOptions({
-                                        fillColor: '#fff200',
-                                    });
-                                }
-                                
-                                if (currCircle.voteBalance < 0) {
-                                    currCircle.setOptions({
-                                        fillColor: '#2cabff',
-                                    });
-                                }
-                                if (currCircle.voteBalance == 0) {
-                                    if (mood == "happy") {
+                                    if (currCircle.voteBalance > 0) {
                                         currCircle.setOptions({
                                             fillColor: '#fff200',
                                         });
-                                    } else {
+                                    }
+                                    
+                                    if (currCircle.voteBalance < 0) {
                                         currCircle.setOptions({
                                             fillColor: '#2cabff',
                                         });
                                     }
+                                    if (currCircle.voteBalance === 0) {
+                                        if (mood == "happy") {
+                                            currCircle.setOptions({
+                                                fillColor: '#fff200',
+                                            });
+                                        } else {
+                                            currCircle.setOptions({
+                                                fillColor: '#2cabff',
+                                            });
+                                        }
+                                    }
+                                    
+                                    var multiplier = currCircle.voteBalance;
+                                    if (currCircle.voteBalance < 0)
+                                        multiplier = multiplier * (-1);
+                                    
+                                    if (multiplier !== 0)
+                                        currCircle.setRadius(30 + (20 * multiplier) - 20)
+                                    if (multiplier === 0)
+                                        currCircle.setRadius(30 + (20 * multiplier))
+
+
+                                } else {
+                                    console.log("failed to update MoodCircle");
                                 }
-                                
-                                var multiplier = currCircle.voteBalance;
-                                if (currCircle.voteBalance < 0)
-                                    multiplier = multiplier * (-1);
-                                
-                                if (multiplier != 0)
-                                    currCircle.setRadius(30 + (20 * multiplier) - 20)
-                                if (multiplier == 0)
-                                    currCircle.setRadius(30 + (20 * multiplier))
-
-
-                            } else {
-                                console.log("failed to update MoodCircle");
-                            }
-                        });
+                            });
+                        }
                     }
                 }
             }
@@ -687,32 +726,83 @@ function initMapDependencies() {
     });
 }
 
-function startChat(userId, username){
+function addChatMessage(chatElem,chat, message){
+    isSend = false;
+    if (message.sender == user._id)
+        isSend = true;
+    var otherPerson;
+    if (chat.user1._id == user._id)
+        otherPerson = chat.user2;
+    else
+        otherPerson = chat.user1;
     
-    if ($("ul.pagination.pagination-sm > li[data-userid='" + userId + "']").length < 1) {
-        $("ul.pagination.pagination-sm > li").removeClass("active");
-        $('<li class="active" data-userId="' + userId + '"><a href="#">anonlike</a></li>').insertBefore($("ul.pagination.pagination-sm > li.right-arrow"))
-        var params = "userid="+userId
-        XHRPost("/api/chat/addChatWindow", params, function () {
-            if (this.status == 200) {
-                var res = JSON.parse(this.responseText);
-                console.log( res);
-                $("ul.pagination.pagination-sm > li[data-userid='" + userId + "']").attr("data-chatid", res._id);
-
-                $('div.msg_container_base').hide();
-                
-                var chatwindow = $('<div class="panel-body msg_container_base" data-chatid="' + res._id + '"><div class="row msg_container base_sent" ><div class="col-md-10 col-xs-10"><div class="messages msg_sent"><p>that mongodb thing looks good, huh?</p><time datetime="2009-11-13T20:00">Timothy • 51 min</time></div></div><div class="col-md-2 col-xs-2 avatar"><img src="" class="img-responsive"></div></div></div>');
-                $(".chat_window.chat-window>.panel").prepend(chatwindow);
-
-            }
-        });
-        
+    if (isSend) {
+        var image = "/images/NoPic.jpg";
+        if (user.image)
+            image = "/userimages/" + user.image
+        $(chatElem).append('<div class="row msg_container base_receive"><div class="col-md-2 col-xs-2 avatar"><a href="/profile/"><img src="' + image + '" class="img-responsive"></a></div><div class="col-md-10 col-xs-10"><div class="messages msg_receive"><p>' + message.message + '</p><time>' + "You" + ' • ' + FriendlyDate(message.date) + ' ago</time></div></div></div>')
     } else {
-        $("ul.pagination.pagination-sm > li").removeClass("active");
-        $("ul.pagination.pagination-sm > li[data-userid='" + userId + "']").addClass("active");
-        $('div.msg_container_base').hide();
-        console.log($("ul.pagination.pagination-sm > li[data-userid='" + userId + "']").attr("data-chatid"))
-        $('div[data-chatid='+ $("ul.pagination.pagination-sm > li[data-userid='" + userId + "']").attr("data-chatid")+"]").show();
+        var image = "/images/NoPic.jpg";
+        if (otherPerson.image)
+            image = "/userimages/" + otherPerson.image
+        $(chatElem).append('<div class="row msg_container base_sent"><div class="col-md-10 col-xs-10"><div class="messages base_sent"><p>' + message.message + '</p><time><a href="/profile/' + otherPerson.username + '">' + otherPerson.username + '</a> • ' + FriendlyDate( message.date) + ' ago</time></div></div><div class="col-md-2 col-xs-2 avatar"><a href="/profile/' + otherPerson.username + '"><img src="' + image + '" class="img-responsive"></a></div></div>')
+    
+    }
+}
+
+function startChat(userId, username, next){
+    if (userId == user._id) {
+        console.log("That's you!");
+        return;
+    } else {
+        if ($("ul.pagination.pagination-sm > li[data-userid='" + userId + "']").length < 1) {
+            $("ul.pagination.pagination-sm > li").removeClass("active");
+            var obj = $('<li class="active" data-userId="' + userId + '"><a href="#">' + username + '</a></li>');
+            $(obj).insertBefore($("ul.pagination.pagination-sm > li.right-arrow"));
+            obj.click(function (e) {
+                e.preventDefault();
+                $(e.target).removeClass("newMessage");
+                $("ul.pagination.pagination-sm > li").removeClass("active");
+                $("ul.pagination.pagination-sm > li[data-userid='" + userId + "']").addClass("active");
+                $('div.msg_container_base').hide();
+                $('div[data-chatid=' + $("ul.pagination.pagination-sm > li[data-userid='" + userId + "']").attr("data-chatid") + "]").show();
+                $('div[data-chatid=' + $("ul.pagination.pagination-sm > li[data-userid='" + userId + "']").attr("data-chatid") + "]").get(0).scrollTop = $('div[data-chatid=' + $("ul.pagination.pagination-sm > li[data-userid='" + userId + "']").attr("data-chatid") + "]").get(0).scrollHeight;
+            });
+            var params = "userid=" + userId
+            XHRPost("/api/chat/addChatWindow", params, function () {
+                if (this.status == 200) {
+                    var res = JSON.parse(this.responseText);
+                    $("ul.pagination.pagination-sm > li[data-userid='" + userId + "']").attr("data-chatid", res._id);
+                    
+                    $('div.msg_container_base').hide();
+                    
+                    var chatwindow = $('<div class="panel-body msg_container_base" data-chatid="' + res._id + '"></div>');
+                    $(".chat_window.chat-window>.panel").prepend(chatwindow);
+                    
+                    for (var i in res.messages) {
+                        addChatMessage(chatwindow, res, res.messages[i])
+                    }
+                    chatwindow.get(0).scrollTop = chatwindow.get(0).scrollHeight;
+                    $('#btn-chat').prop('disabled', false);
+                    if (next)
+                        next(true);
+                }
+            });
+        
+        } else {
+            if (!next) {
+
+                $("#headingFive").removeClass("newMessage");
+                $("ul.pagination.pagination-sm > li").removeClass("active");
+                $("ul.pagination.pagination-sm > li[data-userid='" + userId + "']").addClass("active");
+                $('div.msg_container_base').hide();
+                console.log($("ul.pagination.pagination-sm > li[data-userid='" + userId + "']").attr("data-chatid"))
+                $('div[data-chatid=' + $("ul.pagination.pagination-sm > li[data-userid='" + userId + "']").attr("data-chatid") + "]").show();
+                $('div[data-chatid=' + $("ul.pagination.pagination-sm > li[data-userid='" + userId + "']").attr("data-chatid") + "]").get(0).scrollTop = $('div[data-chatid=' + $("ul.pagination.pagination-sm > li[data-userid='" + userId + "']").attr("data-chatid") + "]").get(0).scrollHeight;
+            }
+            else
+                next();
+        }
     }
 
 }
@@ -790,7 +880,13 @@ $(function () {
                 if (res[i].voter.location)
                     loc = res[i].voter.location;
                 var img = "<div class='img-circle profile-item-image' " + src + " ' ></div>";
-                var content = "<div class='col-xs-6'>" + img + "</div><div class='col-xs-6'>" + res[i].voter.name + "<br>" + loc + "</div>"
+                var WantsToChat
+                if (res[i].voter.Available)
+                    WantsToChat = "Wants to chat!";
+                else
+                    WantsToChat = "Doesn't want to chat";
+
+                var content = "<div class='col-xs-6'>" + img + "</div><div class='col-xs-6'>" + res[i].voter.name + "<br><strong>"+ WantsToChat+"<br></strong>" + loc + "</div>"
                 if (res[i].type == "moodCircle")
                     placeLoc = 'around <a class="location-link" data-type="' + res[i].type + '" data-locId="' + res[i].id + '" href="#">' + res[i].name + ', '+ res[i].location+'</a>';
                 if (res[i].type == "event")
@@ -799,12 +895,16 @@ $(function () {
                 $("#collapseOne > .panel-body > .empty").remove();
                 $("#collapseOne > .panel-body").append(obj);
                 obj.children(".panel-body").children(".hoverUser").popover({ trigger: "hover" });
-                obj.children(".panel-body").children(".hoverUser").click(function(e){
-                    e.preventDefault();
-                    $('#collapseFive').collapse('show');
-                    $($(this).parent().parent().parent().parent()).collapse('hide');
-                    startChat($(this).attr('data-userid'), $(this).attr('data-original-title'));
-                });
+                if (res[i].voter.Available) {
+                    obj.children(".panel-body").children(".hoverUser").click(function (e) {
+                        e.preventDefault();
+                        if ($(this).attr('data-userid') != user._id) {
+                            $('#collapseFive').collapse('show');
+                            $($(this).parent().parent().parent().parent()).collapse('hide');
+                            startChat($(this).attr('data-userid'), $(this).attr('data-original-title'));
+                        }
+                    });
+                }
                 obj.children(".panel-body").children(".location-link").click(function (e) {
                     e.preventDefault();
                     if ($(this).attr("data-type") == "event") {
@@ -855,8 +955,10 @@ $(function () {
         
         if (this.status == 200) {
             var res = JSON.parse(this.responseText);
+            console.log(res)
             
             for (var i in res) {
+                
                 if (res[i].user1._id == user._id)
                     startChat(res[i].user2._id, res[i].user2.username);
                 else
@@ -875,7 +977,7 @@ $(function () {
         e.preventDefault();
         service = (service === undefined)? new google.maps.places.PlacesService(map) : service;
         var mapcenter = map.getCenter();
-        service.textSearch({ 'query': $(e.target[0]).val(), 'location': new google.maps.LatLng(mapcenter.lat(), mapcenter.lng()),"radius":40000 }, function (results, artatus) {
+        service.textSearch({ 'query': $(e.target[0]).val(), 'location': new google.maps.LatLng(mapcenter.lat(), mapcenter.lng()),"radius":40000 }, function (results, status) {
             if (status == google.maps.places.PlacesServiceStatus.OK) {
                 console.log(results[0]);
                 map.setCenter(results[0].geometry.location);
@@ -886,6 +988,8 @@ $(function () {
                 }
                 else
                     map.setZoom(16);
+            } else {
+                console.log(status)
             }
         });
     });
@@ -953,6 +1057,9 @@ $(function () {
                 })
             })
         }
+    });
+    $("#headingFive").click(function (e) {
+        $("#headingFive").removeClass("newMessage")
     });
 });
 

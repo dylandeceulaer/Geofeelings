@@ -32,19 +32,23 @@ block content
                         h3.panel-title Profile Info
                     .panel-body
                         .profile-info-item
-                            .col-xs-3.profile-item-title Name
-                            .col-xs-8.text-capitalize#name
+                            .col-xs-4.profile-item-title Name
+                            .col-xs-7.text-capitalize#name
                                  =user.name
                             .col-xs-1 
                                 <i class="fa fa-pencil" title="Public"></i>
 
                         .profile-info-item
-                            .col-xs-3.profile-item-title Location
-                            .col-xs-8#location #{user.location}
+                            .col-xs-4.profile-item-title Location
+                            .col-xs-7#location #{user.location}
                             .col-xs-1 
                                 <i class="fa fa-pencil" title="Public"></i> 
                         .profile-info-item
-                            .col-xs-3.profile-item-title Joined
+                            .col-xs-4.profile-item-title Want to chat?
+                            .col-xs-7
+                                input(type="checkbox", id="AvailableCheckbox" checked=(user.Available))
+                        .profile-info-item
+                            .col-xs-4.profile-item-title Joined
                             .col-xs-7 #{user.createdOn.toLocaleDateString('be-BE')}
                 .panel.panel-default
                     .panel-heading

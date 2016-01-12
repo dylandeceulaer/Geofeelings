@@ -6,34 +6,7 @@ var UsersRepo = require("../data/models/usersRepo");
 var CommentRepo = require("../data/models/commentRepo");
 var eventRepo = require("../data/models/eventRepo");
 var moodCircleRepo = require("../data/models/moodCircleRepo");
-
-function joinUpdates(list1, list2,next){
-    var res = [];
-    for (var i in list1) {
-        for (var ii in list1[i].votes) {
-            if (list1[i].votes[ii]) {
-                list1[i].votes[ii].type = "event";
-                list1[i].votes[ii].name = list1[i].name;
-                list1[i].votes[ii].location = list1[i].location;
-                res.push(list1[i].votes[ii]); 
-            }
-        }
-    }
-    for (var i in list2) {
-        for (var ii in list2[i].votes) {
-            if (list2[i].votes[ii]) {
-                list2[i].votes[ii].type = "moodCircle";
-                list2[i].votes[ii].name = list2[i].name;
-                list2[i].votes[ii].location = list2[i].city;
-                res.push(list2[i].votes[ii]);
-            }
-        }
-    }
-    res.sort(function (a, b) {
-        return (Date.parse(b.Date) - Date.parse(a.Date));
-    });
-    next(res);
-}
+var profilehelp = require("./middleware/profilehelp");
 
 router.get('/', function (req, res) {
     if (req.user)
@@ -44,7 +17,7 @@ router.get('/', function (req, res) {
             if (err && err == "No records found") {
                 eventRepo.getUserUpdates(req.user._id, function (err, resUpdates) {
                     moodCircleRepo.getUserUpdates(req.user._id, function (err, resCircleUpdates) {
-                        joinUpdates(resUpdates, resCircleUpdates, function (updateres) {
+                        profilehelp.joinUpdates(resUpdates, resCircleUpdates, function (updateres) {
                             req.user.updates = updateres;
                             res.render('profileEdit', { title: 'GeoMood - Edit Profile', user : req.user, specialNav: specialNav, activeLi: "specialnav" });
                         });
@@ -61,7 +34,7 @@ router.get('/', function (req, res) {
             } else {
                 eventRepo.getUserUpdates(req.user._id, function (err, resUpdates) {
                     moodCircleRepo.getUserUpdates(req.user._id, function (err, resCircleUpdates) {
-                        joinUpdates(resUpdates, resCircleUpdates, function (updateres) {
+                        profilehelp.joinUpdates(resUpdates, resCircleUpdates, function (updateres) {
                             req.user.updates = updateres;
                             req.user.comments = arrComments;
                             res.render('profileEdit', { title: 'GeoMood - Edit Profile', user : req.user, specialNav: specialNav, activeLi: "specialnav" });
@@ -89,7 +62,7 @@ router.get('/:User', function (req, res) {
                     if (err && err == "No records found") {
                         eventRepo.getUserUpdates(result[0]._id, function (err, resUpdates) {
                             moodCircleRepo.getUserUpdates(result[0]._id, function (err, resCircleUpdates) {
-                                joinUpdates(resUpdates, resCircleUpdates, function (updateres) {
+                                profilehelp.joinUpdates(resUpdates, resCircleUpdates, function (updateres) {
                                     result[0].updates = updateres;
                                     res.render('profile', { title: 'GeoMood - Profile: ' + user, qryUser : result[0], user : req.user, specialNav: specialNav, activeLi: "specialnav" });
                                 });
@@ -104,7 +77,7 @@ router.get('/:User', function (req, res) {
                     } else {
                         eventRepo.getUserUpdates(result[0]._id, function (err, resUpdates) {
                             moodCircleRepo.getUserUpdates(result[0]._id, function (err, resCircleUpdates) {
-                                joinUpdates(resUpdates, resCircleUpdates, function (updateres) {
+                                profilehelp.joinUpdates(resUpdates, resCircleUpdates, function (updateres) {
                                     result[0].updates = updateres;
                                     result[0].comments = arrComments;
                                     res.render('profile', { title: 'GeoMood - Profile: ' + user, qryUser : result[0], user : req.user, specialNav: specialNav, activeLi: "specialnav" });

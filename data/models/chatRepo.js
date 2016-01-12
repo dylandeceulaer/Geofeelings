@@ -5,6 +5,7 @@ ChatRepo = (function () {
     var Chat = require("./chat.js");
     
     var getActiveChatWindows = function (id, next) {
+        console.log(id);
         Chat.find({ $or: [{ user1: id }, { user2: id }], isActive: true }).populate('user1').populate('user2').exec(function (err, res) {
             if (err) {
                 console.log(err);
@@ -17,7 +18,7 @@ ChatRepo = (function () {
         });
     }, 
         newChat = function (user1, user2, next) {
-            Chat.create({ user1: user1, user2: user2 }, function (err, res) {
+            Chat.create({ user1: user1, user2: user2}, function (err, res) {
                 if (err) { return next(err); }
                 next(null,res);
             });
@@ -54,12 +55,23 @@ ChatRepo = (function () {
             });
         },
         getChat = function (user1, user2, next) {
-            Chat.findOne({ $or: [{ user1: user1 }, { user1: user2 }], $or: [{ user2: user1 }, { user2: user2 }] }, { messages: { $slice: -10 } }).populate('user1').populate('user2').exec(function (err, res) {
+            Chat.findOne({ user1: user1, user2: user2 }, { messages: { $slice: -10 } }).populate('user1').populate('user2').exec(function (err, res) {
                 if (err) {
                     console.log(err);
                     next(err, null);
                 } else {
-                    next(null, res);
+                    if (!res) {
+                        Chat.findOne({ user1: user2, user2: user1 }, { messages: { $slice: -10 } }).populate('user1').populate('user2').exec(function (err, res) {
+                            if (err) {
+                                console.log(err);
+                                next(err, null);
+                            } else {
+                                next(null, res);
+                            }
+                        });
+                    }
+                    else
+                        next(null, res);
                 }
             });
         },

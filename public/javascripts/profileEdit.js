@@ -45,6 +45,7 @@
                     } else {
                         $('<div class="comment-item"><div class="col-xs-2"><div title="' + user.username + '" style="background-image: url(/images/NoPic.jpg)" class="img-circle comment-item-image"></div></div><div class="col-xs-10"><div class="panel"><div class="panel-body">' + comment + '</div></div></div></div>').insertBefore($(".comment-body").children().first());
                     }
+                    $(".comment-body > .col-xs-12 > .empty" ).remove();
                     $("#replyInput").val("");
                 }
             });
@@ -107,6 +108,13 @@
             }
         });
     });
-    
+    $("#AvailableCheckbox").change(function (e) {
+        
+        XHRPost("/api/users/setAvailabilityState", "state=" + $(e.target).is(":checked"), function () {
+            if (this.status == 200) {
+                console.log("ok");
+            }
+        });
+    });
     
 })
